@@ -9,11 +9,13 @@ const {
     addToWishList,
     rating,
     uploadImages,
+    createRandomProduct,
 } = require('../controller/productCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const { uploadPhoto, productImagResize } = require('../middlewares/uploadImages');
 
 router.post('/', authMiddleware, isAdmin, createProduct);
+router.post('/random-product', authMiddleware, isAdmin, createRandomProduct);
 
 router.get('/', getAllProducts);
 router.get('/:id', getAProduct);

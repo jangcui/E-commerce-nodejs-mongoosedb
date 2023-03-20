@@ -1,5 +1,6 @@
 const Product = require('../models/productModel');
 const User = require('../models/userModel');
+const { faker } = require('@faker-js/faker');
 const asyncHandler = require('express-async-handler');
 const fs = require('fs');
 const slugify = require('slugify');
@@ -22,11 +23,15 @@ const createProduct = asyncHandler(async (req, res) => {
 // create random products
 const createRandomProduct = asyncHandler(async (req, res) => {
     try {
-        if (req.body.title) {
-            req.body.slug = slugify(req.body.title);
-        }
-
-        const newProduct = await Product.create(req.body);
+        const newProduct = await Product.create({
+            title: faker.commerce.productName('technics'),
+            slug: faker.commerce.productAdjective(''),
+            description: faker.commerce.productName(''),
+            price: faker.commerce.price(100, 5000),
+            category: faker.lorem.slug('technics'),
+            quantity: faker.datatype.number({ min: 10, max: 100 }),
+            images: faker.image.technics(),
+        });
         res.json(newProduct);
     } catch (err) {
         throw new Error(err);
@@ -238,5 +243,6 @@ module.exports = {
     updateProduct,
     addToWishList,
     rating,
+    createRandomProduct,
     uploadImages,
 };

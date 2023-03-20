@@ -30,28 +30,19 @@ const createUser = asyncHandler(async (req, res) => {
 
 //create random user
 const createRandomUser = asyncHandler(async (req, res) => {
-    try {
-        const user = {
+    //create new user
+    for (let i = 0; i <= 10; i++) {
+        const newUser = await User.create({
             email: faker.internet.email(),
-            avatar: faker.image.avatar(),
             fist_name: faker.name.firstName(),
             last_name: faker.name.lastName(),
             mobile: faker.phone.phoneNumber('+84-##-###-####'),
             password: faker.internet.password(),
             address: faker.address.streetAddress(),
-        };
-        //create new user
-        let newUser = await User.create(user);
-        newUser.save();
+        });
         res.json(newUser);
-    } catch {
-        //handle user
-        throw new Error('User already exists');
     }
 });
-
-//get random user
-const getRandomUser = asyncHandler(async (req, res) => {});
 
 ///login user
 const loginUserCtrl = asyncHandler(async (req, res) => {
@@ -550,5 +541,4 @@ module.exports = {
     getOrder,
     updateOrderStatus,
     createRandomUser,
-    getRandomUser,
 };
