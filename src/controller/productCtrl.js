@@ -24,11 +24,45 @@ const createProduct = asyncHandler(async (req, res) => {
 const createRandomProduct = asyncHandler(async (req, res) => {
     try {
         const newProduct = await Product.create({
-            title: faker.commerce.productName('technics'),
-            slug: faker.commerce.productAdjective(''),
-            description: faker.commerce.productName(''),
+            title: `Sản phẩm điện thoại với màn hình ${faker.random.arrayElement([
+                'AMOLED',
+                'IPS',
+                'TFT',
+            ])} kích thước ${faker.random.arrayElement([
+                '5 inch',
+                '5.5 inch',
+                '6 inch',
+                '6.5 inch',
+            ])}, hỗ trợ kết nối 4G, 5G, wifi và bluetooth, bộ vi xử lý ${faker.random.arrayElement([
+                'Snapdragon',
+                'Exynos',
+                'Apple A-series',
+            ])}, bộ nhớ trong ${faker.random.number({ min: 32, max: 512 })} GB và RAM ${faker.random.number({
+                min: 2,
+                max: 16,
+            })} GB, camera ${faker.random.number({ min: 12, max: 108 })} MP, hệ điều hành ${faker.random.arrayElement([
+                'Android',
+                'iOS',
+            ])}, pin dung lượng ${faker.random.number({
+                min: 3000,
+                max: 6000,
+            })} mAh, giá cả phù hợp với nhu cầu sử dụng của người dùng.`,
+            slug: slugify(faker.commerce.productName(), { lower: true, remove: /[*+~.()'"!:@]/g }),
+            description: `Một chiếc điện thoại ${faker.random.arrayElement([
+                'Apple',
+                'Samsung',
+                'Xiaomi',
+                'OPPO',
+                'Vivo',
+            ])} ${faker.commerce.productName()} với màn hình ${faker.random.arrayElement([
+                'AMOLED',
+                'IPS',
+                'TFT',
+            ])} đẹp mắt, đầy đủ tính năng hiện đại, giá cả hợp lý và phù hợp với nhu cầu sử dụng của bạn.`,
             price: faker.commerce.price(100, 5000),
-            category: faker.lorem.slug('technics'),
+            category: faker.lorem.technics(),
+            brand: faker.random.arrayElement(['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'Vivo']),
+            color: faker.random.arrayElement(['Black', 'Brown', 'Red', 'Green', 'Yellow', 'White']),
             quantity: faker.datatype.number({ min: 10, max: 100 }),
             images: faker.image.technics(),
         });

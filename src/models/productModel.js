@@ -28,7 +28,7 @@ var productSchema = new mongoose.Schema(
         },
         brand: {
             type: String,
-            enum: ['Apple', 'SamSung', 'Xiaomi', 'hp'],
+            enum: ['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'Vivo'],
         },
         quantity: {
             type: Number,
