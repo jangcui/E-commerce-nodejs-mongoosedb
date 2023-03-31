@@ -18,9 +18,9 @@ const brandRouter = require('./src/routes/brandRoute');
 const couponRouter = require('./src/routes/couponRoute');
 
 dbConnect();
-app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
 app.use(cookieParser());
 app.use(morgan('dev'));
