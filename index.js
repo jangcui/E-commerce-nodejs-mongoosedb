@@ -1,4 +1,5 @@
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
 const dbConnect = require('./src/config/dbConnect');
@@ -17,7 +18,7 @@ const brandRouter = require('./src/routes/brandRoute');
 const couponRouter = require('./src/routes/couponRoute');
 
 dbConnect();
-
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
