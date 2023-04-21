@@ -10,7 +10,7 @@ var oderSchema = new mongoose.Schema(
                     ref: 'Product',
                 },
                 count: Number,
-                color: String,
+                color: [],
             },
         ],
         paymentIntent: {},

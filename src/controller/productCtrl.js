@@ -5,7 +5,7 @@ const asyncHandler = require('express-async-handler');
 const fs = require('fs');
 const slugify = require('slugify');
 const validateMongooseDbId = require('../untils/validateMongooseDbId');
-const cloudinaryUploadImg = require('../untils/cloudinary');
+const { cloudinaryUploadImg, cloudinaryDeleteImg } = require('../untils/cloudinary');
 
 //// create a new product
 const createProduct = asyncHandler(async (req, res) => {
@@ -13,7 +13,6 @@ const createProduct = asyncHandler(async (req, res) => {
         if (req.body.title) {
             req.body.slug = slugify(req.body.title);
         }
-
         const newProduct = await Product.create(req.body);
         res.json(newProduct);
     } catch (err) {
@@ -21,56 +20,56 @@ const createProduct = asyncHandler(async (req, res) => {
     }
 });
 // create random products
-const createRandomProduct = asyncHandler(async (req, res) => {
-    try {
-        const newProduct = await Product.create({
-            title: `Sản phẩm điện thoại với màn hình ${faker.random.arrayElement([
-                'AMOLED',
-                'IPS',
-                'TFT',
-            ])} kích thước ${faker.random.arrayElement([
-                '5 inch',
-                '5.5 inch',
-                '6 inch',
-                '6.5 inch',
-            ])}, hỗ trợ kết nối 4G, 5G, wifi và bluetooth, bộ vi xử lý ${faker.random.arrayElement([
-                'Snapdragon',
-                'Exynos',
-                'Apple A-series',
-            ])}, bộ nhớ trong ${faker.random.number({ min: 32, max: 512 })} GB và RAM ${faker.random.number({
-                min: 2,
-                max: 16,
-            })} GB, camera ${faker.random.number({ min: 12, max: 108 })} MP, hệ điều hành ${faker.random.arrayElement([
-                'Android',
-                'iOS',
-            ])}, pin dung lượng ${faker.random.number({
-                min: 3000,
-                max: 6000,
-            })} mAh, giá cả phù hợp với nhu cầu sử dụng của người dùng.`,
-            slug: slugify(faker.commerce.productName(), { lower: true, remove: /[*+~.()'"!:@]/g }),
-            description: `Một chiếc điện thoại ${faker.random.arrayElement([
-                'Apple',
-                'Samsung',
-                'Xiaomi',
-                'OPPO',
-                'Vivo',
-            ])} ${faker.commerce.productName()} với màn hình ${faker.random.arrayElement([
-                'AMOLED',
-                'IPS',
-                'TFT',
-            ])} đẹp mắt, đầy đủ tính năng hiện đại, giá cả hợp lý và phù hợp với nhu cầu sử dụng của bạn.`,
-            price: faker.commerce.price(100, 5000),
-            category: faker.lorem.technics(),
-            brand: faker.random.arrayElement(['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'Vivo']),
-            color: faker.random.arrayElement(['Black', 'Brown', 'Red', 'Green', 'Yellow', 'White']),
-            quantity: faker.datatype.number({ min: 10, max: 100 }),
-            images: faker.image.technics(),
-        });
-        res.json(newProduct);
-    } catch (err) {
-        throw new Error(err);
-    }
-});
+// const createRandomProduct = asyncHandler(async (req, res) => {
+//     try {
+//         const newProduct = await Product.create({
+//             title: `Sản phẩm điện thoại với màn hình ${faker.random.arrayElement([
+//                 'AMOLED',
+//                 'IPS',
+//                 'TFT',
+//             ])} kích thước ${faker.random.arrayElement([
+//                 '5 inch',
+//                 '5.5 inch',
+//                 '6 inch',
+//                 '6.5 inch',
+//             ])}, hỗ trợ kết nối 4G, 5G, wifi và bluetooth, bộ vi xử lý ${faker.random.arrayElement([
+//                 'Snapdragon',
+//                 'Exynos',
+//                 'Apple A-series',
+//             ])}, bộ nhớ trong ${faker.random.number({ min: 32, max: 512 })} GB và RAM ${faker.random.number({
+//                 min: 2,
+//                 max: 16,
+//             })} GB, camera ${faker.random.number({ min: 12, max: 108 })} MP, hệ điều hành ${faker.random.arrayElement([
+//                 'Android',
+//                 'iOS',
+//             ])}, pin dung lượng ${faker.random.number({
+//                 min: 3000,
+//                 max: 6000,
+//             })} mAh, giá cả phù hợp với nhu cầu sử dụng của người dùng.`,
+//             slug: slugify(faker.commerce.productName(), { lower: true, remove: /[*+~.()'"!:@]/g }),
+//             description: `Một chiếc điện thoại ${faker.random.arrayElement([
+//                 'Apple',
+//                 'Samsung',
+//                 'Xiaomi',
+//                 'OPPO',
+//                 'Vivo',
+//             ])} ${faker.commerce.productName()} với màn hình ${faker.random.arrayElement([
+//                 'AMOLED',
+//                 'IPS',
+//                 'TFT',
+//             ])} đẹp mắt, đầy đủ tính năng hiện đại, giá cả hợp lý và phù hợp với nhu cầu sử dụng của bạn.`,
+//             price: faker.commerce.price(100, 5000),
+//             category: faker.lorem.technics(),
+//             brand: faker.random.arrayElement(['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'Vivo']),
+//             color: faker.random.arrayElement(['Black', 'Brown', 'Red', 'Green', 'Yellow', 'White']),
+//             quantity: faker.datatype.number({ min: 10, max: 100 }),
+//             images: faker.image.technics(),
+//         });
+//         res.json(newProduct);
+//     } catch (err) {
+//         throw new Error(err);
+//     }
+// });
 
 /// update a product
 const updateProduct = asyncHandler(async (req, res) => {
@@ -243,8 +242,6 @@ const rating = asyncHandler(async (req, res) => {
 
 ////upload image
 const uploadImages = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
     try {
         const uploader = (path) => cloudinaryUploadImg(path, 'images');
         const urls = [];
@@ -255,16 +252,20 @@ const uploadImages = asyncHandler(async (req, res) => {
             urls.push(newPath);
             fs.unlinkSync(path);
         }
-        const findProduct = await Product.findByIdAndUpdate(
-            id,
-            {
-                images: urls.map((file) => {
-                    return file;
-                }),
-            },
-            { new: true },
-        );
-        res.json(findProduct);
+        const images = urls.map((file) => {
+            return file;
+        });
+
+        res.json(images);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
+const deleteImage = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deleted = cloudinaryDeleteImg(id, 'images');
+        res.json({ message: 'deleted' });
     } catch (err) {
         throw new Error(err);
     }
@@ -277,6 +278,7 @@ module.exports = {
     updateProduct,
     addToWishList,
     rating,
-    createRandomProduct,
+    // createRandomProduct,
     uploadImages,
+    deleteImage,
 };
