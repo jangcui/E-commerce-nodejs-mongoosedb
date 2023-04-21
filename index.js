@@ -22,7 +22,12 @@ const couponRouter = require('./src/routes/couponRoute');
 dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+ const corsOptions ={
+       origin:'*', 
+       credentials:true, //access-control-allow-credentials:true
+        optionSuccessStatus:200,
+ }
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 app.use(morgan('dev'));
