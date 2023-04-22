@@ -105,6 +105,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
             fist_name: findAdmin?.fist_name,
             last_name: findAdmin?.last_name,
             email: findAdmin?.email,
+            role: findAdmin?.role,
             mobile: findAdmin?.mobile,
             token: generateToken(findAdmin?._id),
         });
