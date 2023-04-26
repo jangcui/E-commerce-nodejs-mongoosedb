@@ -15,7 +15,7 @@ const { uploadPhoto, blogImagResize } = require('../middlewares/uploadImages');
 
 router.post('/', authMiddleware, isAdmin, createBlog);
 
-router.get('/all-blogs', getAllBlogs);
+router.get('/', getAllBlogs);
 router.get('/:id', getTheBlog);
 
 router.put('/likes', authMiddleware, likeTheBlog);
