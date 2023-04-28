@@ -490,7 +490,7 @@ const getOrder = asyncHandler(async (req, res) => {
     const { id } = req.user;
     validateMongooseDbId(id);
     try {
-        const userOrder = await Order.findOne({ orderBy: id }).populate('orderBy');
+        const userOrder = await Order.findOne({ orderBy: id }).populate('orderBy').populate('products.product');
         res.json(userOrder);
     } catch (err) {
         throw new Error(err);
