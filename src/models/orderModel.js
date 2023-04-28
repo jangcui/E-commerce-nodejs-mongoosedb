@@ -13,15 +13,16 @@ var oderSchema = new mongoose.Schema(
                 color: [],
             },
         ],
+
         paymentIntent: {},
         orderStatus: {
             type: String,
             default: 'Not Processed',
             enum: ['Not Processed', 'Cash on Delivery', 'Processing', 'Dispatched', 'Cancelled', 'Delivered'],
         },
-        orderby: {
+        orderBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
+            ref: 'User',
         },
     },
     {
