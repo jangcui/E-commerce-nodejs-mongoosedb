@@ -43,7 +43,7 @@ router.get('/refresh', handleRefreshToken);
 router.get('/logout', logOut);
 router.get('/wishlist', authMiddleware, getWishlist);
 router.get('/cart', authMiddleware, getUserCart);
-router.get('/all-orders', authMiddleware, getUserCart);
+router.get('/all-orders', authMiddleware, isAdmin, getAllOrders);
 router.get('/orders', authMiddleware, getOrder);
 router.get('/:id', authMiddleware, isAdmin, getAUser);
 
