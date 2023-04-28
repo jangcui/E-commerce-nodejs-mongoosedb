@@ -16,7 +16,7 @@ var cartSchema = new mongoose.Schema(
         ],
         cartTotal: Number,
         totalAfterDiscount: Number,
-        orderBy: {
+        orderby: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'user',
         },

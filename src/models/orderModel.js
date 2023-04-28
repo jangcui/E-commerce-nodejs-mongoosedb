@@ -19,7 +19,7 @@ var oderSchema = new mongoose.Schema(
             default: 'Not Processed',
             enum: ['Not Processed', 'Cash on Delivery', 'Processing', 'Dispatched', 'Cancelled', 'Delivered'],
         },
-        orderBy: {
+        orderby: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'user',
         },

@@ -363,7 +363,7 @@ const userCart = asyncHandler(async (req, res) => {
         let products = [];
         const user = await User.findById(_id);
         // check if user already product in cart
-        let alreadyExistCart = await Cart.findOne({ orderBy: user._id });
+        let alreadyExistCart = await Cart.findOne({ orderby: user._id });
         if (alreadyExistCart) {
             await Cart.findByIdAndDelete(alreadyExistCart._id);
         }
@@ -386,7 +386,7 @@ const userCart = asyncHandler(async (req, res) => {
         let newCart = await new Cart({
             products,
             cartTotal,
-            orderBy: user._id,
+            orderby: user._id,
         }).save();
         res.json(newCart);
     } catch (err) {
@@ -399,7 +399,7 @@ const getUserCart = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongooseDbId(_id);
     try {
-        const findCart = await Cart.findOne({ orderBy: _id }).populate('products.product');
+        const findCart = await Cart.findOne({ orderby: _id }).populate('products.product');
         res.json(findCart);
     } catch (err) {
         throw new Error(err);
@@ -412,7 +412,7 @@ const emptyCart = asyncHandler(async (req, res) => {
     validateMongooseDbId(_id);
     try {
         const user = await User.findOne(_id);
-        const cart = await Cart.findOneAndRemove({ orderBy: user._id });
+        const cart = await Cart.findOneAndRemove({ orderby: user._id });
         res.json(cart);
     } catch (err) {
         throw new Error(err);
@@ -429,11 +429,11 @@ const applyCoupon = asyncHandler(async (req, res) => {
         throw new Error('invalid coupon');
     }
     const user = await User.findOne(_id);
-    let { cartTotal } = await Cart.findOne({ orderBy: user._id }).populate('products.product');
+    let { cartTotal } = await Cart.findOne({ orderby: user._id }).populate('products.product');
     let totalAfterDiscount = (cartTotal - (cartTotal * validCoupon.discount) / 100).toFixed(2);
     console.log(validCoupon);
     await Cart.findOneAndUpdate(
-        { orderBy: user._id },
+        { orderby: user._id },
         {
             totalAfterDiscount: totalAfterDiscount,
         },
@@ -450,7 +450,7 @@ const createOrder = asyncHandler(async (req, res) => {
     try {
         if (!COD) throw new Error('create cash order fail');
         const user = await User.findOne(_id);
-        let userCart = await Cart.findOne({ orderBy: user._id });
+        let userCart = await Cart.findOne({ orderby: user._id });
         let finalAmount = 0;
         if (couponApplied && userCart.totalAfterDiscount) {
             finalAmount = userCart.totalAfterDiscount;
@@ -467,7 +467,7 @@ const createOrder = asyncHandler(async (req, res) => {
                 createdAt: Date.now(),
                 currency: 'usd',
             },
-            orderBy: user._id,
+            orderby: user._id,
             orderStatus: 'Cash on Delivery',
         }).save();
         let update = userCart.products.map((item) => {
@@ -490,7 +490,7 @@ const getOrder = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongooseDbId(_id);
     try {
-        const userOrder = await Order.findOne({ orderBy: _id }).populate('products.product').populate('orderBy').exec();
+        const userOrder = await Order.findOne({ orderby: _id }).populate('products.product').populate('orderby').exec();
         res.json(userOrder);
     } catch (err) {
         throw new Error(err);
