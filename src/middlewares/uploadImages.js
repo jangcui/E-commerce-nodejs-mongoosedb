@@ -5,7 +5,7 @@ const fs = require('fs');
 
 const multerStorage = multer.diskStorage({
     destination: function (req, res, callback) {
-        callback(null, path.join(__dirname, '../public/images/'));
+        callback(null, path.join(__dirname, '../public/images'));
     },
     filename: function (req, file, callback) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
