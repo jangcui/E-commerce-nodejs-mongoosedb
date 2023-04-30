@@ -18,15 +18,16 @@ const brandRouter = require('./src/routes/brandRoute');
 const enqRouter = require('./src/routes/enqRoute');
 const colorRouter = require('./src/routes/colorRoute');
 const couponRouter = require('./src/routes/couponRoute');
+const uploadRouter = require('./src/routes/uploadRoute');
 
 dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
- const corsOptions ={
-       origin:'*', 
-       credentials:true, //access-control-allow-credentials:true
-        optionSuccessStatus:200,
- }
+const corsOptions = {
+    origin: '*',
+    credentials: true, //access-control-allow-credentials:true
+    optionSuccessStatus: 200,
+};
 app.use(cors(corsOptions));
 
 app.use(cookieParser());
@@ -41,6 +42,7 @@ app.use('/api/brand', brandRouter);
 app.use('/api/enquiry', enqRouter);
 app.use('/api/color', colorRouter);
 app.use('/api/coupon', couponRouter);
+app.use('/api/upload', uploadRouter);
 
 app.use(notFound);
 app.use(errorHandler);
