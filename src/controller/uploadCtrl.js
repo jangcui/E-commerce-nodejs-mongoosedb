@@ -1,21 +1,21 @@
 const asyncHandler = require('express-async-handler');
+
 const { cloudinaryUploadImg, cloudinaryDeleteImg } = require('../untils/cloudinary');
 const fs = require('fs');
 
 ////upload image
+
 const uploadImages = asyncHandler(async (req, res) => {
     try {
-        const uploader = (path) => cloudinaryUploadImg(path, 'images');
-        const urls = [];
         const files = req.files;
-        for (const file of files) {
-            const { path } = file;
-            const newPath = await uploader(path);
-            urls.push(newPath);
-            fs.unlinkSync(path);
-        }
-        const images = urls.map((file) => {
-            return file;
+        const uploadedImages = await cloudinaryUploadImg(files);
+
+        const images = uploadedImages.map((file) => {
+            return {
+                url: file.url,
+                asset_id: file.asset_id,
+                public_id: file.public_id,
+            };
         });
 
         res.json(images);
@@ -23,6 +23,7 @@ const uploadImages = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+
 const deleteImage = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
@@ -32,6 +33,7 @@ const deleteImage = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+
 module.exports = {
     uploadImages,
     deleteImage,
