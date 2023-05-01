@@ -3,8 +3,11 @@ const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 
-const multerStorage = multer.memoryStorage();
-
+const multerStorage = multer.diskStorage({
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    },
+});
 const multerFilter = (req, file, callback) => {
     if (file.mimetype.startsWith('image')) {
         callback(null, true);
