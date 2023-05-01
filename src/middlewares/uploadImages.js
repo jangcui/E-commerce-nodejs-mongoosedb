@@ -3,15 +3,7 @@ const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 
-const multerStorage = multer.diskStorage({
-    destination: function (req, res, callback) {
-        callback(null, path.join(__dirname, '../public/images'));
-    },
-    filename: function (req, file, callback) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        callback(null, file.fieldname + '-' + uniqueSuffix + '.jpeg');
-    },
-});
+const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, callback) => {
     if (file.mimetype.startsWith('image')) {
