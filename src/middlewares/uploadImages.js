@@ -23,20 +23,27 @@ const uploadPhoto = multer({
 });
 
 const productImagResize = async (req, res, next) => {
-    if (!req.files) {
-        return next();
-    }
     try {
+        if (!req.files) {
+            return next();
+        }
         await Promise.all(
             req.files.map(async (file) => {
                 await sharp(file.path)
-                    .resize(300, 300)
-                    .toFormat('jpeg')
-                    .jpeg({ quality: 90 })
-                    .toFile(`src/public/images/products/${file.filename}`);
-                fs.unlinkSync(`src/public/images/products/${file.filename}`);
+                    .resize({
+                        width: 100,
+                        height: 100,
+                        fit: sharp.fit.inside,
+                        withoutEnlargement: true,
+                    })
+                    .jpeg({
+                        quality: 90,
+                        progressive: true,
+                    })
+                    .toFormat('jpeg');
             }),
         );
+        s;
         next();
     } catch (err) {
         next(err);
