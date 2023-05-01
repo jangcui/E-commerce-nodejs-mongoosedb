@@ -7,23 +7,37 @@ const fs = require('fs');
 
 const uploadImages = asyncHandler(async (req, res) => {
     try {
+        const uploader = (path) => cloudinaryUploadImg(path, 'images');
+        const images = [];
         const files = req.files;
-        const uploadedImages = await cloudinaryUploadImg(files);
-
-        const images = uploadedImages.map((file) => {
-            return {
-                url: file.url,
-                asset_id: file.asset_id,
-                public_id: file.public_id,
-            };
-        });
-
+        for (const file of files) {
+            const { path } = file;
+            const { url, asset_id, public_id } = await uploader(path);
+            images.push({ url, asset_id, public_id });
+            fs.unlinkSync(path);
+        }
         res.json(images);
     } catch (err) {
         throw new Error(err);
     }
 });
 
+// const uploadImages = asyncHandler(async (req, res) => {
+//     try {
+//         const uploader = (path) => cloudinaryUploadImg(path, 'images');
+//         const files = req.files;
+
+//         const uploadedFiles = await Promise.all(files.map((file) => uploader(file.path)));
+//         const images = uploadedFiles.map((file) => file.url);
+
+//         await Promise.all(files.map((file) => fs.promises.unlink(file.path)));
+
+//         res.json(images);
+//     } catch (err) {
+//         console.error(err);
+//         throw new Error('Error uploading images');
+//     }
+// });
 const deleteImage = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
