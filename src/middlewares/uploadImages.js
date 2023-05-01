@@ -31,8 +31,8 @@ const productImagResize = async (req, res, next) => {
             req.files.map(async (file) => {
                 await sharp(file.path)
                     .resize({
-                        width: 100,
-                        height: 100,
+                        width: 1000,
+                        height: 1000,
                         fit: sharp.fit.inside,
                         withoutEnlargement: true,
                     })
@@ -43,7 +43,6 @@ const productImagResize = async (req, res, next) => {
                     .toFormat('jpeg');
             }),
         );
-        s;
         next();
     } catch (err) {
         next(err);
