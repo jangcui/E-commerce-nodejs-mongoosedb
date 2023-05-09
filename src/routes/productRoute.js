@@ -20,7 +20,7 @@ router.get('/:id', getAProduct);
 
 router.put('/wishlist', authMiddleware, addToWishList);
 router.put('/rating', authMiddleware, rating);
-router.put('/update-product/:id', authMiddleware, isAdmin, updateProduct);
+router.put('/:id', authMiddleware, isAdmin, updateProduct);
 
 router.delete('/delete/:id', authMiddleware, isAdmin, deleteAProduct);
 
