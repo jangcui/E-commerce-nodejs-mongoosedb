@@ -496,6 +496,16 @@ const getOrder = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+const getOrderUserId = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongooseDbId(id);
+    try {
+        const userOrder = await Order.findOne({ orderBy: id }).populate('orderBy').populate('products.product');
+        res.json(userOrder);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
 const getAllOrders = asyncHandler(async (req, res) => {
     try {
         const allUserOrder = await Order.find().populate('orderBy').populate('products.product');
@@ -552,4 +562,5 @@ module.exports = {
     getOrder,
     updateOrderStatus,
     createRandomUser,
+    getOrderUserId,
 };

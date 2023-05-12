@@ -25,6 +25,7 @@ const {
     updateOrderStatus,
     createRandomUser,
     getAllOrders,
+    getOrderUserId,
 } = require('../controller/userCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const router = express.Router();
@@ -43,6 +44,7 @@ router.get('/refresh', handleRefreshToken);
 router.get('/logout', logOut);
 router.get('/wishlist', authMiddleware, getWishlist);
 router.get('/cart', authMiddleware, getUserCart);
+router.get('/order-user/:id', authMiddleware, isAdmin, getOrderUserId);
 router.get('/all-orders', authMiddleware, isAdmin, getAllOrders);
 router.get('/orders', authMiddleware, getOrder);
 router.get('/:id', authMiddleware, isAdmin, getAUser);

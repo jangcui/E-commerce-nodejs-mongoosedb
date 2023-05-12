@@ -14,6 +14,7 @@ var cartSchema = new mongoose.Schema(
                 price: Number,
             },
         ],
+
         cartTotal: Number,
         totalAfterDiscount: Number,
         orderBy: {
