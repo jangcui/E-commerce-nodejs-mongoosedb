@@ -32,7 +32,7 @@ const deleteImage = asyncHandler(async (req, res) => {
     const { id } = req.params;
     try {
         const deleted = cloudinaryDeleteImg(id, 'images');
-        res.json({ message: 'deleted' });
+        res.json({ message: 'Deleted.' });
     } catch (err) {
         throw new Error(err);
     }

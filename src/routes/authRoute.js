@@ -7,9 +7,8 @@ const {
     getAUser,
     deleteAUser,
     updatedAUser,
-    blockUser,
+    toggleBlockUser,
     logOut,
-    unBlockUser,
     updatePassword,
     forgotPasswordToken,
     resetPassword,
@@ -26,6 +25,7 @@ const {
     createRandomUser,
     getAllOrders,
     getOrderUserId,
+    toggleUserToTrashBin,
 } = require('../controller/userCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const router = express.Router();
@@ -54,10 +54,10 @@ router.delete('/:id', deleteAUser);
 
 router.put('/reset-password/:token', resetPassword);
 router.put('/password', authMiddleware, updatePassword);
+router.put('/trash/:id', authMiddleware, isAdmin, toggleUserToTrashBin);
 router.put('/save-address', authMiddleware, saveAddress);
 router.put('/edit-user', authMiddleware, updatedAUser);
 router.put('/order/update-order/:id', authMiddleware, isAdmin, updateOrderStatus);
-router.put('/block-user/:id', authMiddleware, isAdmin, blockUser);
-router.put('/unblock-user/:id', authMiddleware, isAdmin, unBlockUser);
+router.put('/toggle-block/:id', authMiddleware, isAdmin, toggleBlockUser);
 
 module.exports = router;

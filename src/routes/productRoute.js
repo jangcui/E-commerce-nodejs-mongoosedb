@@ -8,6 +8,7 @@ const {
     updateProduct,
     addToWishList,
     rating,
+    toggleProductToTrashBin,
     // createRandomProduct,
 } = require('../controller/productCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
@@ -19,6 +20,7 @@ router.get('/', getAllProducts);
 router.get('/:id', getAProduct);
 
 router.put('/wishlist', authMiddleware, addToWishList);
+router.put('/trash/:id', authMiddleware, isAdmin, toggleProductToTrashBin);
 router.put('/rating', authMiddleware, rating);
 router.put('/:id', authMiddleware, isAdmin, updateProduct);
 

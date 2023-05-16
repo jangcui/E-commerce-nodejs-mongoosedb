@@ -51,7 +51,7 @@ const deleteTheBrand = asyncHandler(async (req, res) => {
     validateMongooseDbId(id);
     try {
         const deleteTheBrand = await Brand.findByIdAndDelete(id);
-        res.json(deleteTheBrand);
+        res.json({ message: 'Deleted.' });
     } catch (err) {
         throw new Error(err);
     }

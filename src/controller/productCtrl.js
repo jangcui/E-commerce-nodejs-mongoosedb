@@ -1,6 +1,5 @@
 const Product = require('../models/productModel');
 const User = require('../models/userModel');
-const { faker } = require('@faker-js/faker');
 const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
 const validateMongooseDbId = require('../untils/validateMongooseDbId');
@@ -17,57 +16,6 @@ const createProduct = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
-// create random products
-// const createRandomProduct = asyncHandler(async (req, res) => {
-//     try {
-//         const newProduct = await Product.create({
-//             title: `Sản phẩm điện thoại với màn hình ${faker.random.arrayElement([
-//                 'AMOLED',
-//                 'IPS',
-//                 'TFT',
-//             ])} kích thước ${faker.random.arrayElement([
-//                 '5 inch',
-//                 '5.5 inch',
-//                 '6 inch',
-//                 '6.5 inch',
-//             ])}, hỗ trợ kết nối 4G, 5G, wifi và bluetooth, bộ vi xử lý ${faker.random.arrayElement([
-//                 'Snapdragon',
-//                 'Exynos',
-//                 'Apple A-series',
-//             ])}, bộ nhớ trong ${faker.random.number({ min: 32, max: 512 })} GB và RAM ${faker.random.number({
-//                 min: 2,
-//                 max: 16,
-//             })} GB, camera ${faker.random.number({ min: 12, max: 108 })} MP, hệ điều hành ${faker.random.arrayElement([
-//                 'Android',
-//                 'iOS',
-//             ])}, pin dung lượng ${faker.random.number({
-//                 min: 3000,
-//                 max: 6000,
-//             })} mAh, giá cả phù hợp với nhu cầu sử dụng của người dùng.`,
-//             slug: slugify(faker.commerce.productName(), { lower: true, remove: /[*+~.()'"!:@]/g }),
-//             description: `Một chiếc điện thoại ${faker.random.arrayElement([
-//                 'Apple',
-//                 'Samsung',
-//                 'Xiaomi',
-//                 'OPPO',
-//                 'Vivo',
-//             ])} ${faker.commerce.productName()} với màn hình ${faker.random.arrayElement([
-//                 'AMOLED',
-//                 'IPS',
-//                 'TFT',
-//             ])} đẹp mắt, đầy đủ tính năng hiện đại, giá cả hợp lý và phù hợp với nhu cầu sử dụng của bạn.`,
-//             price: faker.commerce.price(100, 5000),
-//             category: faker.lorem.technics(),
-//             brand: faker.random.arrayElement(['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'Vivo']),
-//             color: faker.random.arrayElement(['Black', 'Brown', 'Red', 'Green', 'Yellow', 'White']),
-//             quantity: faker.datatype.number({ min: 10, max: 100 }),
-//             images: faker.image.technics(),
-//         });
-//         res.json(newProduct);
-//     } catch (err) {
-//         throw new Error(err);
-//     }
-// });
 
 /// update a product
 const updateProduct = asyncHandler(async (req, res) => {
@@ -113,6 +61,9 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
         let query = Product.find(JSON.parse(queryStr));
 
+        // Add the condition to exclude isDelete: true
+        query = query.where('isDelete').ne(true);
+
         //sorting
         if (req.query.sort) {
             const sortBy = req.query.sort.split(',').join(' ');
@@ -148,14 +99,28 @@ const getAllProducts = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+//// add to trash bin
+const toggleProductToTrashBin = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongooseDbId(id);
+
+    try {
+        const product = await Product.findById(id);
+        const isDeleted = product.isDelete || false;
+        const productUpdate = await Product.findByIdAndUpdate(id, { isDelete: !isDeleted }, { new: true });
+        res.json(productUpdate);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
 
 ///delete a product
 const deleteAProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const findProduct = await Product.findByIdAndDelete(id);
-        res.json(findProduct);
+        const product = await Product.findByIdAndDelete(id);
+        res.json({ message: 'Deleted.' });
     } catch (err) {
         throw new Error(err);
     }
@@ -245,6 +210,6 @@ module.exports = {
     getAllProducts,
     updateProduct,
     addToWishList,
+    toggleProductToTrashBin,
     rating,
-    // createRandomProduct,
 };

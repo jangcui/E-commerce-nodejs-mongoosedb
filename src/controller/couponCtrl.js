@@ -51,8 +51,8 @@ const deleteTheCoupon = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const deleteTheCoupon = await Coupon.findByIdAndDelete(id);
-        res.json(deleteTheCoupon);
+        const coupon = await Coupon.findByIdAndDelete(id);
+        res.json({ message: 'Deleted.' });
     } catch (err) {
         throw new Error(err);
     }

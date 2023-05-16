@@ -50,8 +50,8 @@ const deleteTheCategory = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const deleteTheCategory = await ProdCategory.findByIdAndDelete(id);
-        res.json(deleteTheCategory);
+        const category = await ProdCategory.findByIdAndDelete(id);
+        res.json({ message: 'Deleted.' });
     } catch (err) {
         throw new Error(err);
     }

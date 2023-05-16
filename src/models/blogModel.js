@@ -33,12 +33,17 @@ var blogSchema = new mongoose.Schema(
                 ref: 'User',
             },
         ],
+
         dislikes: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User',
             },
         ],
+        isDelete: {
+            type: Boolean,
+            default: false,
+        },
         author: {
             type: String,
             default: 'Admin',

@@ -26,6 +26,11 @@ var productSchema = new mongoose.Schema(
             type: String,
             ref: 'Category',
         },
+        isDelete: {
+            type: Boolean,
+            default: false,
+        },
+
         brand: {
             type: String,
             enum: [],

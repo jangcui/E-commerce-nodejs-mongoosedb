@@ -47,8 +47,21 @@ const getTheBlog = asyncHandler(async (req, res) => {
 ///get all blog
 const getAllBlogs = asyncHandler(async (req, res) => {
     try {
-        const getAllBlogs = await Blog.find();
+        const getAllBlogs = await Blog.find({ isDelete: { $ne: true } });
         res.json(getAllBlogs);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
+//// add to trash bin
+const toggleBlogToTrashBin = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongooseDbId(id);
+    try {
+        const blog = await Blog.findById(id);
+        const isDeleted = blog.isDelete || false;
+        const blogUpdate = await Blog.findByIdAndUpdate(id, { isDelete: !isDeleted }, { new: true });
+        res.json(blogUpdate);
     } catch (err) {
         throw new Error(err);
     }
@@ -60,7 +73,7 @@ const deleteBlog = asyncHandler(async (req, res) => {
 
     try {
         const deleteBlog = await Blog.findByIdAndDelete(id);
-        res.json(deleteBlog);
+        res.json({ message: 'Deleted.' });
     } catch (err) {
         throw new Error(err);
     }
@@ -72,6 +85,9 @@ const likeTheBlog = asyncHandler(async (req, res) => {
     validateMongooseDbId(blogId);
     /// find the  blog want to liked
     const blog = await Blog.findById(blogId);
+    if (!blog) {
+        return res.status(404).json({ message: 'Blog not found' });
+    }
     //find login user
     const loginUserId = req?.user?._id;
     //find user liked blog
@@ -195,4 +211,5 @@ module.exports = {
     likeTheBlog,
     disLikeTheBlog,
     uploadImages,
+    toggleBlogToTrashBin,
 };

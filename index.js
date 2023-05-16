@@ -18,6 +18,7 @@ const brandRouter = require('./src/routes/brandRoute');
 const enqRouter = require('./src/routes/enqRoute');
 const colorRouter = require('./src/routes/colorRoute');
 const couponRouter = require('./src/routes/couponRoute');
+const trashRouter = require('./src/routes/trashRoute');
 const uploadRouter = require('./src/routes/uploadRoute');
 
 dbConnect();
@@ -43,6 +44,7 @@ app.use('/api/enquiry', enqRouter);
 app.use('/api/color', colorRouter);
 app.use('/api/coupon', couponRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/trash', trashRouter);
 
 app.use(notFound);
 app.use(errorHandler);

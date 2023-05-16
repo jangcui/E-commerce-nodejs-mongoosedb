@@ -125,7 +125,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
 ///get all user
 const getAllUser = asyncHandler(async (req, res) => {
     try {
-        const getUsers = await User.find();
+        const getUsers = await User.find({ isDelete: { $ne: true } });
         res.json(getUsers);
     } catch (error) {
         throw new Error(error);
@@ -163,6 +163,20 @@ const saveAddress = asyncHandler(async (req, res) => {
         throw new Error(error);
     }
 });
+//// add to trash bin
+const toggleUserToTrashBin = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongooseDbId(id);
+
+    try {
+        const user = await User.findById(id);
+        const isDeleted = user.isDelete || false;
+        const userUpdate = await User.findByIdAndUpdate(id, { isDelete: !isDeleted }, { new: true });
+        res.json(userUpdate);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
 
 //delete a user
 const deleteAUser = asyncHandler(async (req, res) => {
@@ -170,7 +184,7 @@ const deleteAUser = asyncHandler(async (req, res) => {
     validateMongooseDbId(id);
     try {
         const deleteAUser = await User.findByIdAndDelete(id);
-        res.json(deleteAUser);
+        res.json({ message: 'Deleted.' });
     } catch (error) {
         throw new Error(error);
     }
@@ -245,45 +259,27 @@ const updatedAUser = asyncHandler(async (req, res) => {
     }
 });
 
-//block and unblock user
-//block
-const blockUser = asyncHandler(async (req, res) => {
+//toggle block user
+const toggleBlockUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const block = await User.findByIdAndUpdate(
-            id,
-            {
-                isBlocked: true,
-            },
-            {
-                new: true,
-            },
-        );
-        res.json({
-            message: 'user blocked',
-        });
-    } catch (error) {
-        throw new Error(error);
-    }
-});
+        const user = await User.findById(id);
+        const isBlocked = user.isBlocked || false;
 
-//unblock
-const unBlockUser = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
-    try {
-        const block = await User.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             id,
             {
-                isBlocked: false,
+                isBlocked: !isBlocked,
             },
             {
                 new: true,
             },
         );
+        const message = updatedUser.isBlocked ? 'user blocked' : 'user unblocked';
+
         res.json({
-            message: 'user unblocked',
+            message: message,
         });
     } catch (error) {
         throw new Error(error);
@@ -552,8 +548,7 @@ module.exports = {
     getAUser,
     deleteAUser,
     updatedAUser,
-    blockUser,
-    unBlockUser,
+    toggleBlockUser,
     logOut,
     updatePassword,
     forgotPasswordToken,
@@ -570,4 +565,5 @@ module.exports = {
     updateOrderStatus,
     createRandomUser,
     getOrderUserId,
+    toggleUserToTrashBin,
 };

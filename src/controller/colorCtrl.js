@@ -50,8 +50,8 @@ const deleteTheColor = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const deleteTheColor = await Color.findByIdAndDelete(id);
-        res.json(deleteTheColor);
+        const color = await Color.findByIdAndDelete(id);
+        res.json({ message: 'Deleted.' });
     } catch (err) {
         throw new Error(err);
     }
