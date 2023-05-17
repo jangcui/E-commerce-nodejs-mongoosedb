@@ -58,9 +58,15 @@ const toggleBlogToTrashBin = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + 10);
         const blog = await Blog.findById(id);
         const isDeleted = blog.isDelete || false;
-        const blogUpdate = await Blog.findByIdAndUpdate(id, { isDelete: !isDeleted }, { new: true });
+        const blogUpdate = await Blog.findOneAndUpdate(
+            id,
+            { $set: { isDelete: !isDeleted, deleteDate: deadline } },
+            { new: true },
+        );
         res.json(blogUpdate);
     } catch (err) {
         throw new Error(err);

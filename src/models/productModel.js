@@ -58,7 +58,9 @@ var productSchema = new mongoose.Schema(
             type: String,
             default: 0,
         },
+        deleteDate: Date,
     },
+
     {
         timestamps: true,
     },

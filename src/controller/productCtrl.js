@@ -103,11 +103,16 @@ const getAllProducts = asyncHandler(async (req, res) => {
 const toggleProductToTrashBin = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
-
     try {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + 10);
         const product = await Product.findById(id);
         const isDeleted = product.isDelete || false;
-        const productUpdate = await Product.findByIdAndUpdate(id, { isDelete: !isDeleted }, { new: true });
+        const productUpdate = await Product.findOneAndUpdate(
+            id,
+            { $set: { isDelete: !isDeleted, deleteDate: deadline } },
+            { new: true },
+        );
         res.json(productUpdate);
     } catch (err) {
         throw new Error(err);

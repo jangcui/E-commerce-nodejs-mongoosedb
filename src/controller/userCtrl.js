@@ -169,9 +169,15 @@ const toggleUserToTrashBin = asyncHandler(async (req, res) => {
     validateMongooseDbId(id);
 
     try {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + 10);
         const user = await User.findById(id);
         const isDeleted = user.isDelete || false;
-        const userUpdate = await User.findByIdAndUpdate(id, { isDelete: !isDeleted }, { new: true });
+        const userUpdate = await User.findOneAndUpdate(
+            id,
+            { $set: { isDelete: !isDeleted, deleteDate: deadline } },
+            { new: true },
+        );
         res.json(userUpdate);
     } catch (err) {
         throw new Error(err);

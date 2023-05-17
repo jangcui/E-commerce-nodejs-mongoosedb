@@ -49,6 +49,7 @@ var blogSchema = new mongoose.Schema(
             default: 'Admin',
         },
         images: [],
+        deleteDate: Date,
     },
     {
         toJSON: {

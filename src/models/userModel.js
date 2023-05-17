@@ -53,6 +53,7 @@ var userSchema = new mongoose.Schema(
         passwordChangeAt: Date,
         passwordResetToken: String,
         passwordResetExpires: Date,
+        deleteDate: Date,
     },
     {
         timestamps: true,
@@ -75,5 +76,6 @@ userSchema.methods.createPasswordResetToken = async function () {
     this.passwordResetExpress = Date.now() + 10 * 60 * 1000; /// 10 minutes
     return resetToken;
 };
+
 //Export the model
 module.exports = mongoose.model('User', userSchema);
