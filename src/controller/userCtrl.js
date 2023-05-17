@@ -173,9 +173,9 @@ const toggleUserToTrashBin = asyncHandler(async (req, res) => {
         deadline.setDate(deadline.getDate() + 10);
         const user = await User.findById(id);
         const isDeleted = user.isDelete || false;
-        const userUpdate = await User.findOneAndUpdate(
+        const userUpdate = await User.findByIdAndUpdate(
             id,
-            { $set: { isDelete: !isDeleted, deleteDate: deadline } },
+            { isDelete: !isDeleted, deleteDate: deadline },
             { new: true },
         );
         res.json(userUpdate);

@@ -62,9 +62,9 @@ const toggleBlogToTrashBin = asyncHandler(async (req, res) => {
         deadline.setDate(deadline.getDate() + 10);
         const blog = await Blog.findById(id);
         const isDeleted = blog.isDelete || false;
-        const blogUpdate = await Blog.findOneAndUpdate(
+        const blogUpdate = await Blog.findByIdAndUpdate(
             id,
-            { $set: { isDelete: !isDeleted, deleteDate: deadline } },
+            { isDelete: !isDeleted, deleteDate: deadline },
             { new: true },
         );
         res.json(blogUpdate);

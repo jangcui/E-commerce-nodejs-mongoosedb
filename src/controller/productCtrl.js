@@ -108,9 +108,9 @@ const toggleProductToTrashBin = asyncHandler(async (req, res) => {
         deadline.setDate(deadline.getDate() + 10);
         const product = await Product.findById(id);
         const isDeleted = product.isDelete || false;
-        const productUpdate = await Product.findOneAndUpdate(
+        const productUpdate = await Product.findByIdAndUpdate(
             id,
-            { $set: { isDelete: !isDeleted, deleteDate: deadline } },
+            { isDelete: !isDeleted, deleteDate: deadline },
             { new: true },
         );
         res.json(productUpdate);
