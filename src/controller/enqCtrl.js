@@ -1,10 +1,18 @@
 const Enquiry = require('../models/enqModel');
 const asyncHandler = require('express-async-handler');
 const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const slugify = require('slugify');
 
 ///cerate enquiry
 const createEnquiry = asyncHandler(async (req, res) => {
     try {
+        if (req.body.name) {
+            req.body.name = slugify(req.body.name);
+        }
+        const existingEnquiry = await Enquiry.findOne({ name: req.body.name });
+        if (existingEnquiry) {
+            return res.status(400).json({ error: 'Name already exists.' });
+        }
         const newEnquiry = await Enquiry.create(req.body);
         res.json(newEnquiry);
     } catch (err) {
