@@ -22,9 +22,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        if (req.body.title) {
-            req.body.slug = slugify(req.body.title);
-        }
         const updateProduct = await Product.findOneAndUpdate(id, req.body, {
             new: true,
         });
@@ -130,6 +127,7 @@ const deleteAProduct = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+
 ///add to wishlist
 const addToWishList = asyncHandler(async (req, res) => {
     const { _id } = req.user;
