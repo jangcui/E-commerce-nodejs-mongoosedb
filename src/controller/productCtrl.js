@@ -39,9 +39,9 @@ const getAProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const findProduct = await Product.findById(id);
+        const findProduct = await Product.findById(id).populate('color');
         if (!findProduct) {
-            throw new Error('present product not found');
+            throw new Error('Present product not found');
         }
         res.json(findProduct);
     } catch (err) {
