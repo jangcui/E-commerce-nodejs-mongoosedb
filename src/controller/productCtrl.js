@@ -22,9 +22,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const updateProduct = await Product.findOneAndUpdate(id, req.body, {
-            new: true,
-        });
+        const updateProduct = await Product.findByIdAndUpdate(id, req.body, { new: true });
         res.json(updateProduct);
     } catch (err) {
         throw new Error(err);
