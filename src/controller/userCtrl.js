@@ -387,7 +387,7 @@ const getUserCart = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongooseDbId(_id);
     try {
-        const findCart = await Cart.findOne({ orderBy: _id }).populate('products.product');
+        const findCart = await Cart.find({ userId: _id }).populate('productId').populate('color');
         res.json(findCart);
     } catch (err) {
         throw new Error(err);
@@ -400,7 +400,7 @@ const emptyCart = asyncHandler(async (req, res) => {
     validateMongooseDbId(_id);
     try {
         const user = await User.findOne(_id);
-        const cart = await Cart.findOneAndRemove({ orderBy: user._id });
+        const cart = await Cart.findOneAndRemove({ userId: user._id });
         res.json(cart);
     } catch (err) {
         throw new Error(err);
