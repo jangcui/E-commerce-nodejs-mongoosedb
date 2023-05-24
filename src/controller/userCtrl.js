@@ -393,6 +393,19 @@ const getUserCart = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+// remove product from cart
+
+const removeProductFromCart = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { cartItemId } = req.params;
+    validateMongooseDbId(_id);
+    try {
+        const removeProductFromCart = await Cart.deleteOne({ userId: _id, _id: cartItemId });
+        res.json(removeProductFromCart);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
 
 //empty cart
 const emptyCart = asyncHandler(async (req, res) => {
@@ -551,4 +564,5 @@ module.exports = {
     createRandomUser,
     getOrderUserId,
     toggleUserToTrashBin,
+    removeProductFromCart,
 };
