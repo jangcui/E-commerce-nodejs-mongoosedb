@@ -27,6 +27,7 @@ const {
     getOrderUserId,
     toggleUserToTrashBin,
     removeProductFromCart,
+    updateProductQuantityFromCart,
 } = require('../controller/userCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const router = express.Router();
@@ -61,5 +62,6 @@ router.put('/save-address', authMiddleware, saveAddress);
 router.put('/edit-user', authMiddleware, updatedAUser);
 router.put('/order/update-order/:id', authMiddleware, isAdmin, updateOrderStatus);
 router.put('/toggle-block/:id', authMiddleware, isAdmin, toggleBlockUser);
+router.put('/update-product-cart/:cartItemId/:newQuantity', authMiddleware, updateProductQuantityFromCart);
 
 module.exports = router;
