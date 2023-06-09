@@ -9,7 +9,6 @@ const {
     addToWishList,
     rating,
     toggleProductToTrashBin,
-    // createRandomProduct,
 } = require('../controller/productCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 

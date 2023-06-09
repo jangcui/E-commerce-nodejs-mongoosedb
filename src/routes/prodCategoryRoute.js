@@ -13,7 +13,7 @@ router.post('/', authMiddleware, isAdmin, createCategory);
 
 router.put('/:id', authMiddleware, isAdmin, updateCategory);
 
-router.get('/', authMiddleware, isAdmin, getAllCategory);
+router.get('/', getAllCategory);
 router.get('/:id', authMiddleware, isAdmin, getTheCategory);
 
 router.delete('/:id', authMiddleware, isAdmin, deleteTheCategory);

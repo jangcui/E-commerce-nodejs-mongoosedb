@@ -4,7 +4,6 @@ const Cart = require('../models/cartModel');
 const Coupon = require('../models/couponModel');
 const Order = require('../models/orderModel');
 
-const { faker } = require('@faker-js/faker');
 const uniqid = require('uniqid');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
@@ -25,22 +24,6 @@ const createUser = asyncHandler(async (req, res) => {
     } else {
         //handle user
         throw new Error('User already exists');
-    }
-});
-
-//create random user
-const createRandomUser = asyncHandler(async (req, res) => {
-    //create new user
-    for (let i = 0; i <= 10; i++) {
-        const newUser = await User.create({
-            email: faker.internet.email(),
-            fist_name: faker.name.firstName(),
-            last_name: faker.name.lastName(),
-            mobile: faker.phone.phoneNumber('+84-##-###-####'),
-            password: faker.internet.password(),
-            address: faker.address.streetAddress(),
-        });
-        res.json(newUser);
     }
 });
 
@@ -470,6 +453,50 @@ const getMyOrder = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+///////// get Month wise order in come
+const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
+    let monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ];
+    let date = new Date();
+    let endDate = '';
+    date.setDate(1);
+
+    for (let i = 0; i < 11; i++) {
+        date.setMonth(date.getMonth() - 1);
+        endDate = monthNames[date.getMonth()] + ' ' + date.getFullYear();
+    }
+    const data = await Order.aggregate([
+        {
+            $match: {
+                createdAt: {
+                    $lte: new Date(),
+                    $gte: new Date(endDate),
+                },
+            },
+        },
+        {
+            $group: {
+                _id: {
+                    month: '$month',
+                },
+                amount: { $sum: '$total_price_after_discount' },
+            },
+        },
+    ]);
+    res.json(data);
+});
 
 module.exports = {
     createUser,
@@ -489,11 +516,10 @@ module.exports = {
     saveAddress,
     userCart,
     getUserCart,
-    createRandomUser,
     getMyOrder,
     createOrder,
-
     toggleUserToTrashBin,
     removeProductFromCart,
     updateProductQuantityFromCart,
+    getMonthWiseOrderInCome,
 };

@@ -143,7 +143,10 @@ const addToWishList = asyncHandler(async (req, res) => {
                 },
                 { new: true },
             );
-            res.json(user);
+            res.json({
+                message: 'Product Removed To Wishlist',
+                user,
+            });
         } else {
             let user = await User.findByIdAndUpdate(
                 _id,
@@ -152,7 +155,10 @@ const addToWishList = asyncHandler(async (req, res) => {
                 },
                 { new: true },
             );
-            res.json(user);
+            res.json({
+                message: 'Product Added From Wishlist',
+                user,
+            });
         }
     } catch (err) {
         throw new Error(err);
@@ -165,17 +171,17 @@ const rating = asyncHandler(async (req, res) => {
     const { star, comment, prodId } = req.body;
     try {
         const product = await Product.findById(prodId);
-        let alreadyRated = product.ratings?.find((userId) => userId.postedBy.toString() === _id.toString());
+        let alreadyRated = product.ratings?.find((rating) => rating.postedBy.toString() === _id.toString());
         if (alreadyRated) {
             const updateRating = await Product.updateOne(
                 {
-                    ratings: { $elemMatch: alreadyRated },
+                    ratings: { $elemMatch: { _id: alreadyRated._id } },
                 },
                 {
                     $set: { 'ratings.$.star': star, 'ratings.$.comment': comment },
                 },
                 { new: true },
-            );
+            ).populate('ratings.postedBy'); // Populate trường "postedBy" trong mảng "ratings.postedBy"
         } else {
             const rateProduct = await Product.findByIdAndUpdate(
                 prodId,
@@ -185,11 +191,11 @@ const rating = asyncHandler(async (req, res) => {
                     },
                 },
                 { new: true },
-            );
+            ).populate('ratings.postedBy'); // Populate trường "postedBy" trong mảng "ratings.postedBy"
         }
         const getAllRatings = await Product.findById(prodId);
         let totalRating = getAllRatings?.ratings?.length;
-        let ratingSum = getAllRatings.ratings?.map((item) => item.star)?.reduce((prev, crr) => prev + crr, 0);
+        let ratingSum = getAllRatings.ratings?.map((item) => item.star)?.reduce((prev, curr) => prev + curr, 0);
         let actualRating = Math.round(ratingSum / totalRating);
         let finalProduct = await Product.findByIdAndUpdate(
             prodId,

@@ -55,10 +55,7 @@ var oderSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        total_price_after_discount: {
-            type: Number,
-            required: true,
-        },
+
         orderItems: [
             {
                 productId: {
@@ -85,7 +82,14 @@ var oderSchema = new mongoose.Schema(
             type: Date,
             default: Date.now(),
         },
-
+        total_price_after_discount: {
+            type: Number,
+            required: true,
+        },
+        month: {
+            type: String,
+            default: new Date().getMonth(),
+        },
         order_status: {
             type: String,
             default: 'Ordered',
