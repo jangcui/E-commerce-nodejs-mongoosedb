@@ -453,7 +453,7 @@ const getMyOrder = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
-///////// get Month wise order in come
+///////// get Month wise order count
 const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
     let monthNames = [
         'January',
@@ -469,13 +469,13 @@ const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
         'November',
         'December',
     ];
-    let date = new Date();
+    let d = new Date();
     let endDate = '';
-    date.setDate(1);
+    d.setDate(1);
 
     for (let i = 0; i < 11; i++) {
-        date.setMonth(date.getMonth() - 1);
-        endDate = monthNames[date.getMonth()] + ' ' + date.getFullYear();
+        d.setMonth(d.getMonth() - 1);
+        endDate = monthNames[d.getMonth()] + ' ' + d.getFullYear();
     }
     const data = await Order.aggregate([
         {
@@ -492,6 +492,50 @@ const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
                     month: '$month',
                 },
                 amount: { $sum: '$total_price_after_discount' },
+            },
+        },
+    ]);
+    res.json(data);
+});
+///////// get Month wise order count
+const getMonthWiseOrderCount = asyncHandler(async (req, res) => {
+    let monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ];
+    let d = new Date();
+    let endDate = '';
+    d.setDate(1);
+
+    for (let i = 0; i < 11; i++) {
+        d.setMonth(d.getMonth() - 1);
+        endDate = monthNames[d.getMonth()] + ' ' + d.getFullYear();
+    }
+    const data = await Order.aggregate([
+        {
+            $match: {
+                createdAt: {
+                    $lte: new Date(),
+                    $gte: new Date(endDate),
+                },
+            },
+        },
+        {
+            $group: {
+                _id: {
+                    month: '$month',
+                },
+                count: { $sum: 1 },
             },
         },
     ]);
@@ -522,4 +566,5 @@ module.exports = {
     removeProductFromCart,
     updateProductQuantityFromCart,
     getMonthWiseOrderInCome,
+    getMonthWiseOrderCount,
 };

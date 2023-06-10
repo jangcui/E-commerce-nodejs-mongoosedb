@@ -13,7 +13,6 @@ const {
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 
 router.post('/', authMiddleware, isAdmin, createProduct);
-// router.post('/random-product', authMiddleware, isAdmin, createRandomProduct);
 
 router.get('/', getAllProducts);
 router.get('/:id', getAProduct);

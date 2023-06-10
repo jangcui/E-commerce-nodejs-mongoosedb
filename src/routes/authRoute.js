@@ -23,6 +23,7 @@ const {
     removeProductFromCart,
     updateProductQuantityFromCart,
     getMonthWiseOrderInCome,
+    getMonthWiseOrderCount,
 } = require('../controller/userCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const { checkout, paymentVerifyCation } = require('../controller/paymentCtrl');
@@ -44,6 +45,7 @@ router.get('/wishlist', authMiddleware, getWishlist);
 router.get('/cart', authMiddleware, getUserCart);
 router.get('/order', authMiddleware, getMyOrder);
 router.get('/month-wise-order-income', authMiddleware, isAdmin, getMonthWiseOrderInCome);
+router.get('/month-wise-order-count', authMiddleware, isAdmin, getMonthWiseOrderCount);
 router.get('/:id', authMiddleware, isAdmin, getAUser);
 
 router.delete('/delete-product-cart/:cartItemId', authMiddleware, removeProductFromCart);
