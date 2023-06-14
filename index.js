@@ -6,6 +6,7 @@ const dbConnect = require('./src/config/dbConnect');
 const { errorHandler, notFound } = require('./src/middlewares/errorHandle');
 const app = express();
 const dotenv = require('dotenv').config();
+const cron = require('node-cron');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
@@ -20,6 +21,7 @@ const colorRouter = require('./src/routes/colorRoute');
 const couponRouter = require('./src/routes/couponRoute');
 const trashRouter = require('./src/routes/trashRoute');
 const uploadRouter = require('./src/routes/uploadRoute');
+const { autoDeleteUser, autoDeleteProduct, autoDeleteBlog } = require('./src/middlewares/expiredDelete');
 
 dbConnect();
 app.use(bodyParser.json());
@@ -52,3 +54,8 @@ app.use(errorHandler);
 app.listen(PORT, () => {
     console.log(`server running at port: ${PORT}`);
 });
+cron.schedule('0 0 */2 * *', () => {
+    autoDeleteUser();
+    autoDeleteProduct();
+    autoDeleteBlog();
+}).start();

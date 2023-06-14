@@ -23,12 +23,16 @@ const {
     removeProductFromCart,
     updateProductQuantityFromCart,
     getMonthWiseOrderInCome,
-    getMonthWiseOrderCount,
+    getYearlyTotalOrders,
+    getAllOrders,
+    deleteOrder,
+    getAOrder,
+    updateOrderStatus,
+    emptyCart,
 } = require('../controller/userCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const { checkout, paymentVerifyCation } = require('../controller/paymentCtrl');
 const router = express.Router();
-
 router.post('/register', createUser);
 router.post('/forgot-password-token', forgotPasswordToken);
 router.post('/login', loginUser);
@@ -41,21 +45,26 @@ router.post('/order/payment-verify', authMiddleware, paymentVerifyCation);
 router.get('/', getAllUser);
 router.get('/refresh', handleRefreshToken);
 router.get('/logout', logOut);
+router.get('/order/:id', authMiddleware, isAdmin, getAOrder);
 router.get('/wishlist', authMiddleware, getWishlist);
 router.get('/cart', authMiddleware, getUserCart);
 router.get('/order', authMiddleware, getMyOrder);
+router.get('/all-orders', authMiddleware, isAdmin, getAllOrders);
 router.get('/month-wise-order-income', authMiddleware, isAdmin, getMonthWiseOrderInCome);
-router.get('/month-wise-order-count', authMiddleware, isAdmin, getMonthWiseOrderCount);
+router.get('/year-total-orders', authMiddleware, isAdmin, getYearlyTotalOrders);
 router.get('/:id', authMiddleware, isAdmin, getAUser);
 
 router.delete('/delete-product-cart/:cartItemId', authMiddleware, removeProductFromCart);
+router.delete('/order/:id', authMiddleware, isAdmin, deleteOrder);
+router.delete('/cart', authMiddleware, emptyCart);
 router.delete('/:id', deleteAUser);
 
+router.put('/', authMiddleware, updateAUser);
 router.put('/reset-password/:token', resetPassword);
 router.put('/password', authMiddleware, updatePassword);
 router.put('/trash/:id', authMiddleware, isAdmin, toggleUserToTrashBin);
+router.put('/order/:id', authMiddleware, isAdmin, updateOrderStatus);
 router.put('/save-address', authMiddleware, saveAddress);
-router.put('/', authMiddleware, updateAUser);
 router.put('/toggle-block/:id', authMiddleware, isAdmin, toggleBlockUser);
 router.put('/update-product-cart/:cartItemId/:newQuantity', authMiddleware, updateProductQuantityFromCart);
 

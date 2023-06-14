@@ -16,7 +16,12 @@ const { sendEmail } = require('./emailCtrl');
 ///create user
 const createUser = asyncHandler(async (req, res) => {
     const email = req.body.email;
+    const mobile = req.body.mobile;
     const findUser = await User.findOne({ email });
+    const findUserMobile = await User.findOne({ mobile });
+    if (findUserMobile) {
+        throw new Error('This Phone Number Has Been Used Before.');
+    }
     if (!findUser) {
         //create new user
         const newUser = await User.create(req.body);
@@ -54,7 +59,7 @@ const loginUser = asyncHandler(async (req, res) => {
             _id: findUser?._id,
             fist_name: findUser?.fist_name,
             last_name: findUser?.last_name,
-            role: findUser?.role,
+            // role: findUser?.role,
             email: findUser?.email,
             mobile: findUser?.mobile,
             token: generateToken(findUser?._id),
@@ -63,7 +68,28 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new Error('Invalid Credentials');
     }
 });
-
+//update a user
+const updateAUser = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    validateMongooseDbId(_id);
+    try {
+        const newUpdate = await User.findByIdAndUpdate(
+            _id,
+            {
+                fist_name: req?.body?.fist_name,
+                last_name: req?.body?.last_name,
+                email: req?.body?.email,
+                mobile: req?.body?.mobile,
+            },
+            {
+                new: true,
+            },
+        );
+        res.json(newUpdate);
+    } catch (error) {
+        throw new Error(error);
+    }
+});
 ///login admin
 const loginAdmin = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -96,7 +122,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
             fist_name: findAdmin?.fist_name,
             last_name: findAdmin?.last_name,
             email: findAdmin?.email,
-            role: findAdmin?.role,
+            // role: findAdmin?.role,
             mobile: findAdmin?.mobile,
             token: generateToken(findAdmin?._id),
         });
@@ -132,7 +158,7 @@ const saveAddress = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongooseDbId(_id);
     try {
-        const updateAUser = await User.findByIdAndUpdate(
+        const newAddress = await User.findByIdAndUpdate(
             _id,
             {
                 address: req?.body?.address,
@@ -141,7 +167,7 @@ const saveAddress = asyncHandler(async (req, res) => {
                 new: true,
             },
         );
-        res.json(updateAUser);
+        res.json(newAddress);
     } catch (error) {
         throw new Error(error);
     }
@@ -223,29 +249,6 @@ const logOut = asyncHandler(async (req, res) => {
         secure: true,
     });
     return res.sendStatus(204); ///forbidden
-});
-
-//update a user
-const updateAUser = asyncHandler(async (req, res) => {
-    const { _id } = req.user;
-    validateMongooseDbId(_id);
-    try {
-        const updateAUser = await User.findByIdAndUpdate(
-            _id,
-            {
-                fist_name: req?.body?.fist_name,
-                last_name: req?.body?.last_name,
-                email: req?.body?.email,
-                mobile: req?.body?.mobile,
-            },
-            {
-                new: true,
-            },
-        );
-        res.json(updateAUser);
-    } catch (error) {
-        throw new Error(error);
-    }
 });
 
 //toggle block user
@@ -398,6 +401,19 @@ const removeProductFromCart = asyncHandler(async (req, res) => {
     }
 });
 
+// empty cart
+
+const emptyCart = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    validateMongooseDbId(_id);
+    try {
+        const deleteCart = await Cart.deleteMany({ userId: _id });
+        res.json(deleteCart);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
+
 // update product from cart
 
 const updateProductQuantityFromCart = asyncHandler(async (req, res) => {
@@ -453,6 +469,58 @@ const getMyOrder = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+///////// get all orders
+const getAllOrders = asyncHandler(async (req, res) => {
+    try {
+        const orders = await Order.find()
+            .populate('user')
+            .populate('orderItems.productId')
+            .populate('orderItems.color');
+        res.json(orders);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
+
+/////delete order
+const deleteOrder = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongooseDbId(id);
+    try {
+        const myOrder = await Order.findByIdAndDelete(id);
+        res.json({ message: 'Deleted.', myOrder });
+    } catch (err) {
+        throw new Error(err);
+    }
+});
+/////update order
+const updateOrderStatus = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongooseDbId(id);
+    try {
+        const order = await Order.findById(id);
+        order.order_status = req.body.order_status;
+        await order.save();
+        res.json(order);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
+/////get a order for admin
+const getAOrder = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    validateMongooseDbId(id);
+    try {
+        const orders = await Order.findById(id)
+            .populate('user')
+            .populate('orderItems.productId')
+            .populate('orderItems.color');
+        res.json(orders);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
+
 ///////// get Month wise order count
 const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
     let monthNames = [
@@ -492,13 +560,15 @@ const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
                     month: '$month',
                 },
                 amount: { $sum: '$total_price_after_discount' },
+                count: { $sum: 1 },
             },
         },
     ]);
     res.json(data);
 });
-///////// get Month wise order count
-const getMonthWiseOrderCount = asyncHandler(async (req, res) => {
+
+///////// get Year total order
+const getYearlyTotalOrders = asyncHandler(async (req, res) => {
     let monthNames = [
         'January',
         'February',
@@ -532,10 +602,9 @@ const getMonthWiseOrderCount = asyncHandler(async (req, res) => {
         },
         {
             $group: {
-                _id: {
-                    month: '$month',
-                },
+                _id: null,
                 count: { $sum: 1 },
+                amount: { $sum: '$total_price_after_discount' },
             },
         },
     ]);
@@ -560,11 +629,16 @@ module.exports = {
     saveAddress,
     userCart,
     getUserCart,
+    emptyCart,
     getMyOrder,
     createOrder,
     toggleUserToTrashBin,
     removeProductFromCart,
     updateProductQuantityFromCart,
     getMonthWiseOrderInCome,
-    getMonthWiseOrderCount,
+    getYearlyTotalOrders,
+    getAllOrders,
+    deleteOrder,
+    getAOrder,
+    updateOrderStatus,
 };

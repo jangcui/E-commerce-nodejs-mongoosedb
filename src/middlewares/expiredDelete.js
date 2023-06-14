@@ -3,7 +3,7 @@ const Product = require('../models/productModel');
 const Blog = require('../models/blogModel');
 const User = require('../models/userModel');
 
-cron.schedule('0 0 */2 * *', async () => {
+const autoDeleteProduct = async () => {
     try {
         const currentDate = new Date();
 
@@ -12,13 +12,13 @@ cron.schedule('0 0 */2 * *', async () => {
             deleteDate: { $lt: currentDate },
         });
 
-        console.log(`Deleted`);
+        console.log(`Product Deleted`);
     } catch (error) {
         console.error('error:', error);
     }
-}).start();
+};
 
-cron.schedule('0 0 */2 * *', async () => {
+const autoDeleteBlog = async () => {
     try {
         const currentDate = new Date();
 
@@ -27,12 +27,12 @@ cron.schedule('0 0 */2 * *', async () => {
             deleteDate: { $lt: currentDate },
         });
 
-        console.log(`Deleted`);
+        console.log(`Blog Deleted`);
     } catch (error) {
         console.error('error:', error);
     }
-}).start();
-cron.schedule('0 0 */2 * *', async () => {
+};
+const autoDeleteUser = async () => {
     try {
         const currentDate = new Date();
 
@@ -40,8 +40,14 @@ cron.schedule('0 0 */2 * *', async () => {
             isDelete: true,
             deleteDate: { $lt: currentDate },
         });
-        console.log(`Deleted`);
+        console.log(`User Deleted`);
     } catch (error) {
         console.error('error:', error);
     }
-}).start();
+};
+
+module.exports = {
+    autoDeleteUser,
+    autoDeleteProduct,
+    autoDeleteBlog,
+};
