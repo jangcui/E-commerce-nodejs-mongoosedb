@@ -1,4 +1,5 @@
 const Product = require('../models/productModel');
+const Discount = require('../models/discountModel');
 const User = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
@@ -31,10 +32,9 @@ const updateProduct = asyncHandler(async (req, res) => {
 
 //// get a product
 const getAProduct = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
+    const { slug } = req.params;
     try {
-        const findProduct = await Product.findById(id).populate('color');
+        const findProduct = await Product.findOne({ slug: slug.trim() }).populate('color').populate('discountCode');
         if (!findProduct) {
             throw new Error('Present product not found');
         }
@@ -88,7 +88,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
             }
         }
 
-        const product = await query;
+        const product = await query.populate('discountCode');
         res.json(product);
     } catch (err) {
         throw new Error(err);
@@ -210,6 +210,77 @@ const rating = asyncHandler(async (req, res) => {
     }
 });
 
+///apply discount code for product
+const applyDiscount = asyncHandler(async (req, res) => {
+    const { nameProduct, discountCode } = req.body;
+    // validateMongooseDbId(nameProduct);
+
+    try {
+        const discount = await Discount.findOne({ name: discountCode });
+        const product = await Product.findOne({
+            slug: nameProduct
+                .toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-'),
+        });
+        if (!discount) {
+            res.status(404).json({ error: 'Discount code does not exist' });
+            return;
+        }
+        if (!product) {
+            res.status(404).json({ error: 'Product does not exist' });
+            return;
+        }
+        const currentDate = new Date();
+        if (discount.expiry && currentDate > discount.expiry) {
+            res.status(400).json({ error: 'Discount code has expired' });
+            return;
+        }
+
+        product.price_after_discount = product.price - (product.price * discount.percentage) / 100;
+        product.discountCode = discount;
+        const updatedProduct = await product.save();
+        res.json(updatedProduct);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+///remove discount code for product
+const removeDiscount = asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const product = await Product.findById(productId);
+        if (!product) {
+            res.status(404).json({ error: 'Product does not exist' });
+            return;
+        }
+        product.discountCode = undefined;
+        product.price_after_discount = undefined;
+        const updatedProduct = await product.save();
+        res.json(updatedProduct);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+const clearObject = asyncHandler(async (req, res) => {
+    try {
+        const products = await Product.find();
+
+        for (const product of products) {
+            product.discountCode = undefined;
+            product.price_after_discount = undefined;
+            await product.save();
+        }
+
+        res.json(products);
+    } catch (err) {
+        throw new Error(err);
+    }
+});
 module.exports = {
     createProduct,
     getAProduct,
@@ -219,4 +290,7 @@ module.exports = {
     addToWishList,
     toggleProductToTrashBin,
     rating,
+    applyDiscount,
+    removeDiscount,
+    clearObject,
 };

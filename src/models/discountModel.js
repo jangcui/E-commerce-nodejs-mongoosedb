@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // Declare the Schema of the Mongo model
-var couponSchema = new mongoose.Schema({
+var discountSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -12,11 +12,11 @@ var couponSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    discount: {
+    percentage: {
         type: Number,
         required: true,
     },
 });
 
 //Export the model
-module.exports = mongoose.model('Coupon', couponSchema);
+module.exports = mongoose.model('Discount', discountSchema);

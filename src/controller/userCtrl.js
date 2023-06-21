@@ -226,7 +226,7 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
     res.json(user);
 });
 
-//// handle logout
+//// handle logoutca
 const logOut = asyncHandler(async (req, res) => {
     const cookie = req.cookies;
     if (!cookie?.refreshToken) {
@@ -386,7 +386,6 @@ const getUserCart = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
-
 // remove product from cart
 
 const removeProductFromCart = asyncHandler(async (req, res) => {

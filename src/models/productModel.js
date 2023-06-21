@@ -30,10 +30,17 @@ var productSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-
+        discountCode: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Discount',
+            expiry: Date,
+        },
+        price_after_discount: {
+            type: Number,
+            default: 0,
+        },
         brand: {
             type: String,
-            enum: [],
         },
         quantity: {
             type: Number,

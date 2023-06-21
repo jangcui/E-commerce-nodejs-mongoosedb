@@ -37,8 +37,19 @@ const deleteImage = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+const deleteManyImage = asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+    try {
+        const deletePromises = ids.map((id) => cloudinaryDeleteImg(id, 'images'));
+        await Promise.all(deletePromises);
+        res.json({ message: 'Deleted.' });
+    } catch (err) {
+        throw new Error(err);
+    }
+});
 
 module.exports = {
     uploadImages,
     deleteImage,
+    deleteManyImage,
 };

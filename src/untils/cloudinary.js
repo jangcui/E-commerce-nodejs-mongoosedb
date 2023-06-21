@@ -39,4 +39,5 @@ const cloudinaryDeleteImg = async (fileToDelete) => {
         });
     });
 };
+
 module.exports = { cloudinaryUploadImg, cloudinaryDeleteImg };

@@ -19,6 +19,7 @@ const brandRouter = require('./src/routes/brandRoute');
 const enqRouter = require('./src/routes/enqRoute');
 const colorRouter = require('./src/routes/colorRoute');
 const couponRouter = require('./src/routes/couponRoute');
+const discountRouter = require('./src/routes/discountRoute');
 const trashRouter = require('./src/routes/trashRoute');
 const uploadRouter = require('./src/routes/uploadRoute');
 const { autoDeleteUser, autoDeleteProduct, autoDeleteBlog } = require('./src/middlewares/expiredDelete');
@@ -45,6 +46,7 @@ app.use('/api/brand', brandRouter);
 app.use('/api/enquiry', enqRouter);
 app.use('/api/color', colorRouter);
 app.use('/api/coupon', couponRouter);
+app.use('/api/discount', discountRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/trash', trashRouter);
 
