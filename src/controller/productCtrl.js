@@ -217,19 +217,16 @@ const applyDiscount = asyncHandler(async (req, res) => {
 
     try {
         const discount = await Discount.findOne({ name: discountCode });
+        const productConvert = nameProduct.toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
         const product = await Product.findOne({
-            slug: nameProduct
-                .toLowerCase()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-'),
+            slug: productConvert,
         });
         if (!discount) {
             res.status(404).json({ error: 'Discount code does not exist' });
             return;
         }
         if (!product) {
-            res.status(404).json({ error: 'Product does not exist' });
+            res.status(404).json({ error: 'Product does not exist', productConvert });
             return;
         }
         const currentDate = new Date();
