@@ -295,22 +295,26 @@ const updatePassword = asyncHandler(async (req, res) => {
 
 /// forgot password token
 const forgotPasswordToken = asyncHandler(async (req, res) => {
-    const { email } = req.body;
+    const { email, mobile } = req.body;
     const user = await User.findOne({ email });
+    const phoneNumber = await User.findOne({ mobile });
     if (!user) {
-        throw new Error('user not found');
+        throw new Error('User not invalid or not found.');
+    }
+    if (!phoneNumber) {
+        throw new Error('Phone number invalid or not found.');
     }
     try {
         const token = await user.createPasswordResetToken();
         user.save();
         // const path = process.env.BACK_END_URL
-        const path = 'http://localhost:3000';
+        const path = 'xpj-commerce.vercel.app';
         const resetURL = `hi, please follow this link to reset your password, this link is valid till 10 minutes from now.
          <a href='${path}/reset-password/${token}'>Click hear!</a>`;
         const data = {
             to: email,
-            text: 'hey user',
-            subject: 'forgot password link',
+            text: 'Hi there!!',
+            subject: 'Forgot password link',
             htm: resetURL,
         };
         res.json({ token: token });
