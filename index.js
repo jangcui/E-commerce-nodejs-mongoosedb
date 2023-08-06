@@ -10,8 +10,9 @@ dotenv.config();
 const cron = require('node-cron');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-
+// const connectRedis = require('./src/config/redisConnection');
 const authRouter = require('./src/routes/authRoute');
+const adminRouter = require('./src/routes/adminRoute');
 const productRouter = require('./src/routes/productRoute');
 const blogRouter = require('./src/routes/blogRoute');
 const prodCategoryRouter = require('./src/routes/prodCategoryRoute');
@@ -29,7 +30,8 @@ dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 const corsOptions = {
-    origin: '*',
+    origin: ['http://localhost:3000', 'https://xpj-commerce.vercel.app'],
+    // origin: '*',
     credentials: true, //access-control-allow-credentials:true
     optionSuccessStatus: 200,
 };
@@ -39,6 +41,7 @@ app.use(cookieParser());
 app.use(morgan('dev'));
 
 app.use('/api/user', authRouter);
+app.use('/api/admin', adminRouter);
 app.use('/api/product', productRouter);
 app.use('/api/blog', blogRouter);
 app.use('/api/prod-category', prodCategoryRouter);

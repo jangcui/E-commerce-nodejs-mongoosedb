@@ -47,6 +47,7 @@ var userSchema = new mongoose.Schema(
             type: String,
         },
         wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+        token: String,
         refreshToken: {
             type: String,
         },
@@ -67,14 +68,16 @@ userSchema.pre('save', async function (next) {
     const salt = bcrypt.genSaltSync(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
+
 userSchema.methods.isPasswordMatched = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
 userSchema.methods.createPasswordResetToken = async function () {
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetToken = crypto.randomBytes(64).toString('hex');
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     this.passwordResetExpress = Date.now() + 10 * 60 * 1000; /// 10 minutes
+
     return resetToken;
 };
 

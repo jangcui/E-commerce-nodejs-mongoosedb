@@ -1,17 +1,19 @@
-const User = require('../models/userModel');
-const Product = require('../models/productModel');
-const Cart = require('../models/cartModel');
-const Coupon = require('../models/couponModel');
-const Order = require('../models/orderModel');
-
-const uniqid = require('uniqid');
-const jwt = require('jsonwebtoken');
-const asyncHandler = require('express-async-handler');
-const { generateToken } = require('../config/jwtToken');
-const validateMongooseDbId = require('../untils/validateMongooseDbId');
-const { generateRefreshToken } = require('../config/refreshToken');
 const crypto = require('crypto');
+const asyncHandler = require('express-async-handler');
+
+const {
+    generateToken,
+    generateRefreshToken,
+    verifyRefreshToken,
+    addToBlacklist,
+    verifyToken,
+} = require('../config/jwtToken');
+const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const User = require('../models/userModel');
+const Cart = require('../models/cartModel');
+const Order = require('../models/orderModel');
 const { sendEmail } = require('./emailCtrl');
+const client = require('../config/redisConnection');
 
 ///create user
 const createUser = asyncHandler(async (req, res) => {
@@ -32,8 +34,47 @@ const createUser = asyncHandler(async (req, res) => {
     }
 });
 
+const logins = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    //if user exists or not
+    const findUser = await User.findOne({ email });
+    if (!findUser) {
+        throw new Error('Invalid Credentials');
+    }
+
+    if (findUser && (await findUser.isPasswordMatched(password))) {
+        const accessToken = await generateToken(findUser?._id);
+        const refreshToken = await generateRefreshToken(findUser?._id);
+        const updateUser = await User.findByIdAndUpdate(
+            findUser?._id,
+            {
+                token: accessToken,
+            },
+            {
+                new: true,
+            },
+        );
+
+        res.cookie('adminToken', refreshToken, {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+        res.json({
+            _id: findUser?._id,
+            fist_name: findUser?.fist_name,
+            last_name: findUser?.last_name,
+            email: findUser?.email,
+            // role: findUser?.role,
+            mobile: findUser?.mobile,
+            token: accessToken,
+        });
+    } else {
+        throw new Error('Invalid Credentials');
+    }
+});
+
 ///login user
-const loginUser = asyncHandler(async (req, res) => {
+const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     //if user exists or not
     const findUser = await User.findOne({ email });
@@ -41,11 +82,12 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new Error('Invalid Credentials');
     }
     if (findUser && (await findUser.isPasswordMatched(password))) {
-        const refreshToken = await generateRefreshToken(findUser._id);
+        const accessToken = await generateToken(findUser?._id);
+        const refreshToken = await generateRefreshToken(findUser?._id);
         const updateUser = await User.findByIdAndUpdate(
-            findUser.id,
+            findUser._id,
             {
-                refreshToken: refreshToken,
+                token: accessToken,
             },
             {
                 new: true,
@@ -53,7 +95,7 @@ const loginUser = asyncHandler(async (req, res) => {
         );
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            maxAge: 72 * 60 * 60 * 1000,
+            maxAge: 365 * 24 * 60 * 60,
         });
         res.json({
             _id: findUser?._id,
@@ -62,7 +104,7 @@ const loginUser = asyncHandler(async (req, res) => {
             // role: findUser?.role,
             email: findUser?.email,
             mobile: findUser?.mobile,
-            token: generateToken(findUser?._id),
+            token: accessToken,
         });
     } else {
         throw new Error('Invalid Credentials');
@@ -90,68 +132,6 @@ const updateAUser = asyncHandler(async (req, res) => {
         throw new Error(error);
     }
 });
-///login admin
-const loginAdmin = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-    //if user exists or not
-    const findAdmin = await User.findOne({ email });
-    if (!findAdmin) {
-        throw new Error('Invalid Credentials');
-    }
-    if (findAdmin.role !== 'admin') {
-        throw new Error('Your are not admin');
-    }
-
-    if (findAdmin && (await findAdmin.isPasswordMatched(password))) {
-        const refreshToken = await generateRefreshToken(findAdmin._id);
-        const updateUser = await User.findByIdAndUpdate(
-            findAdmin.id,
-            {
-                refreshToken: refreshToken,
-            },
-            {
-                new: true,
-            },
-        );
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            maxAge: 72 * 60 * 60 * 1000,
-        });
-        res.json({
-            _id: findAdmin?._id,
-            fist_name: findAdmin?.fist_name,
-            last_name: findAdmin?.last_name,
-            email: findAdmin?.email,
-            // role: findAdmin?.role,
-            mobile: findAdmin?.mobile,
-            token: generateToken(findAdmin?._id),
-        });
-    } else {
-        throw new Error('Invalid Credentials');
-    }
-});
-
-///get all user
-const getAllUser = asyncHandler(async (req, res) => {
-    try {
-        const getUsers = await User.find({ isDelete: { $ne: true } });
-        res.json(getUsers);
-    } catch (error) {
-        throw new Error(error);
-    }
-});
-
-//get a user
-const getAUser = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
-    try {
-        const getUser = await User.findById(id);
-        res.json(getUser);
-    } catch (error) {
-        throw new Error(error);
-    }
-});
 
 // save address user
 const saveAddress = asyncHandler(async (req, res) => {
@@ -172,109 +152,68 @@ const saveAddress = asyncHandler(async (req, res) => {
         throw new Error(error);
     }
 });
-//// add to trash bin
-const toggleUserToTrashBin = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
-
-    try {
-        const deadline = new Date();
-        deadline.setDate(deadline.getDate() + 10);
-        const user = await User.findById(id);
-        const isDeleted = user.isDelete || false;
-        const userUpdate = await User.findByIdAndUpdate(
-            id,
-            { isDelete: !isDeleted, deleteDate: deadline },
-            { new: true },
-        );
-        res.json(userUpdate);
-    } catch (err) {
-        throw new Error(err);
-    }
-});
-
-//delete a user
-const deleteAUser = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
-    try {
-        const deleteAUser = await User.findByIdAndDelete(id);
-        res.json({ message: 'Deleted.' });
-    } catch (error) {
-        throw new Error(error);
-    }
-});
 
 ///handle refresh token
-const handleRefreshToken = asyncHandler(async (req, res) => {
-    const cookie = req.cookies;
-    if (!cookie?.refreshToken) {
-        throw new Error('no refresh token in cookie');
-    }
-    const refreshToken = cookie.refreshToken;
-    const user = await User.findOne({ refreshToken });
-    if (!user) {
-        throw new Error('no refresh token present in db or not matched.');
-    }
-    jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
-        if (err || user.id !== decoded.id) {
-            throw new Error('there is something wrong with the refresh token');
-        }
-        const accessToken = generateToken(user?._id);
-        res.json({ accessToken });
-    });
-    res.json(user);
-});
-
-//// handle logoutca
-const logOut = asyncHandler(async (req, res) => {
-    const cookie = req.cookies;
-    if (!cookie?.refreshToken) {
-        throw new Error('no refresh token in cookie');
-    }
-    const refreshToken = cookie.refreshToken;
-    const user = await User.findOne({ refreshToken });
-    if (!user) {
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: true,
-        });
-        return res.status(204); ///forbidden
-    }
-    await User.findOneAndUpdate(refreshToken, {
-        refreshToken: '',
-    });
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: true,
-    });
-    return res.sendStatus(204); ///forbidden
-});
-
-//toggle block user
-const toggleBlockUser = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
+const refreshToken = asyncHandler(async (req, res, next) => {
     try {
-        const user = await User.findById(id);
-        const isBlocked = user.isBlocked || false;
+        const cookie = req.cookies;
+        const refreshToken = cookie?.refreshToken;
+        if (!refreshToken) {
+            throw new Error('no refresh token in cookie');
+        }
+        const { id } = await verifyRefreshToken(refreshToken);
 
-        const updatedUser = await User.findByIdAndUpdate(
+        const user = await User.findOne({ _id: id });
+        if (!user) {
+            throw new Error('Can not find user');
+        }
+        //add to blacklist
+        await addToBlacklist(user.token);
+
+        const newToken = await generateToken(user?._id);
+        await User.findByIdAndUpdate(
             id,
             {
-                isBlocked: !isBlocked,
+                token: newToken,
             },
             {
                 new: true,
             },
         );
-        const message = updatedUser.isBlocked ? 'user blocked' : 'user unblocked';
+        res.json({ token: newToken });
+    } catch (err) {
+        next(err);
+    }
+});
 
-        res.json({
-            message: message,
+// handle logout
+const logOut = asyncHandler(async (req, res, next) => {
+    try {
+        const cookie = req.cookies;
+        const refreshToken = cookie?.refreshToken;
+        if (!refreshToken) {
+            throw new Error('no refresh token in cookie');
+        }
+        const { id } = await verifyRefreshToken(refreshToken);
+
+        //add to blacklist
+        await addToBlacklist(refreshToken);
+
+        client.del(id.toString(), (err, reply) => {
+            if (err) throw new Error(err.message);
         });
-    } catch (error) {
-        throw new Error(error);
+        const { token } = await User.findOne({ _id: id });
+
+        //add to blacklist
+        await addToBlacklist(token);
+
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: true,
+        });
+        res.json('logged Out');
+    } catch (err) {
+        next(err);
     }
 });
 
@@ -309,7 +248,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
         user.save();
         // const path = process.env.BACK_END_URL
         const path = 'xpj-commerce.vercel.app';
-        const resetURL = `hi, please follow this link to reset your password, this link is valid till 10 minutes from now.
+        const resetURL = `Hi, please follow this link to reset your password, this link is valid till 10 minutes from now.
          <a href='${path}/reset-password/${token}'>Click hear!</a>`;
         const data = {
             to: email,
@@ -355,7 +294,7 @@ const getWishlist = asyncHandler(async (req, res) => {
     }
 });
 
-// add to cart user
+// add to cart
 const userCart = asyncHandler(async (req, res) => {
     const { productId, color, price, quantity } = req.body;
     const { _id } = req.user;
@@ -390,6 +329,7 @@ const getUserCart = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+
 // remove product from cart
 
 const removeProductFromCart = asyncHandler(async (req, res) => {
@@ -433,7 +373,7 @@ const updateProductQuantityFromCart = asyncHandler(async (req, res) => {
     }
 });
 
-//// create order
+// create order
 const createOrder = asyncHandler(async (req, res) => {
     const { shippingInfo, orderItems, paymentInfo, total_price, total_price_after_discount } = req.body;
     const { _id } = req.user;
@@ -456,7 +396,7 @@ const createOrder = asyncHandler(async (req, res) => {
     }
 });
 
-///////// get my order
+// get my order
 const getMyOrder = asyncHandler(async (req, res) => {
     const { _id } = req.user;
     validateMongooseDbId(_id);
@@ -472,158 +412,13 @@ const getMyOrder = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
-///////// get all orders
-const getAllOrders = asyncHandler(async (req, res) => {
-    try {
-        const orders = await Order.find()
-            .populate('user')
-            .populate('orderItems.productId')
-            .populate('orderItems.color');
-        res.json(orders);
-    } catch (err) {
-        throw new Error(err);
-    }
-});
-
-/////delete order
-const deleteOrder = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
-    try {
-        const myOrder = await Order.findByIdAndDelete(id);
-        res.json({ message: 'Deleted.', myOrder });
-    } catch (err) {
-        throw new Error(err);
-    }
-});
-/////update order
-const updateOrderStatus = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
-    try {
-        const order = await Order.findById(id);
-        order.order_status = req.body.order_status;
-        await order.save();
-        res.json(order);
-    } catch (err) {
-        throw new Error(err);
-    }
-});
-/////get a order for admin
-const getAOrder = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    validateMongooseDbId(id);
-    try {
-        const orders = await Order.findById(id)
-            .populate('user')
-            .populate('orderItems.productId')
-            .populate('orderItems.color');
-        res.json(orders);
-    } catch (err) {
-        throw new Error(err);
-    }
-});
-
-///////// get Month wise order count
-const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
-    let monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-    ];
-    let d = new Date();
-    let endDate = '';
-    d.setDate(1);
-
-    for (let i = 0; i < 11; i++) {
-        d.setMonth(d.getMonth() - 1);
-        endDate = monthNames[d.getMonth()] + ' ' + d.getFullYear();
-    }
-    const data = await Order.aggregate([
-        {
-            $match: {
-                createdAt: {
-                    $lte: new Date(),
-                    $gte: new Date(endDate),
-                },
-            },
-        },
-        {
-            $group: {
-                _id: {
-                    month: '$month',
-                },
-                amount: { $sum: '$total_price_after_discount' },
-                count: { $sum: 1 },
-            },
-        },
-    ]);
-    res.json(data);
-});
-
-///////// get Year total order
-const getYearlyTotalOrders = asyncHandler(async (req, res) => {
-    let monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-    ];
-    let d = new Date();
-    let endDate = '';
-    d.setDate(1);
-
-    for (let i = 0; i < 11; i++) {
-        d.setMonth(d.getMonth() - 1);
-        endDate = monthNames[d.getMonth()] + ' ' + d.getFullYear();
-    }
-    const data = await Order.aggregate([
-        {
-            $match: {
-                createdAt: {
-                    $lte: new Date(),
-                    $gte: new Date(endDate),
-                },
-            },
-        },
-        {
-            $group: {
-                _id: null,
-                count: { $sum: 1 },
-                amount: { $sum: '$total_price_after_discount' },
-            },
-        },
-    ]);
-    res.json(data);
-});
 
 module.exports = {
     createUser,
-    loginUser,
-    loginAdmin,
-    handleRefreshToken,
-    getAllUser,
-    getAUser,
-    deleteAUser,
+    createUser,
+    login,
+    refreshToken,
     updateAUser,
-    toggleBlockUser,
     logOut,
     updatePassword,
     forgotPasswordToken,
@@ -632,16 +427,9 @@ module.exports = {
     saveAddress,
     userCart,
     getUserCart,
-    emptyCart,
-    getMyOrder,
     createOrder,
-    toggleUserToTrashBin,
+    getMyOrder,
     removeProductFromCart,
     updateProductQuantityFromCart,
-    getMonthWiseOrderInCome,
-    getYearlyTotalOrders,
-    getAllOrders,
-    deleteOrder,
-    getAOrder,
-    updateOrderStatus,
+    emptyCart,
 };

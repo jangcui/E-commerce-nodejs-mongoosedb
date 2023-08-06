@@ -1,23 +1,43 @@
 const User = require('../models/userModel');
-const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
+const { verifyToken } = require('../config/jwtToken');
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
-    let token;
-    if (req?.headers?.authorization?.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1];
-        try {
-            if (token) {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                const user = await User.findById(decoded.id);
-                req.user = user;
-                next();
+    try {
+        if (req?.headers?.authorization?.startsWith('Bearer')) {
+            const token = req.headers.authorization.split(' ')[1];
+            if (!token) throw new Error('Token is missing.');
+            const decode = await verifyToken(token);
+            if (!decode) {
+                throw new Error('decode failed ');
             }
-        } catch (err) {
-            throw new Error('Not authorized expired, please login.');
+            const user = await User.findById(decode.id);
+            if (!user) throw new Error('User not found.');
+            req.user = user;
+            next();
+        } else {
+            throw new Error('Invalid token format.');
         }
-    } else {
-        throw new Error('There is no token attached to headers');
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                name: err.name,
+                status: 401,
+                message: 'Token has expired.',
+            });
+        } else if (err.name === 'JsonWebTokenError') {
+            return res.status(401).json({
+                name: err.name,
+                status: 401,
+                message: 'Invalid token.',
+            });
+        } else {
+            return res.status(401).json({
+                name: err.name,
+                status: 401,
+                message: 'Unauthorized',
+            });
+        }
     }
 });
 
