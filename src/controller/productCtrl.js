@@ -5,7 +5,7 @@ const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
 const validateMongooseDbId = require('../untils/validateMongooseDbId');
 
-//// create a new product
+// create a new product
 const createProduct = asyncHandler(async (req, res) => {
     try {
         if (req.body.title) {
@@ -30,8 +30,8 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
 });
 
-//// get a product
-const getAProduct = asyncHandler(async (req, res) => {
+// get a product
+const getAProduct = asyncHandler(async (req, res, next) => {
     const { slug } = req.params;
     try {
         const findProduct = await Product.findOne({ slug: slug.trim() }).populate('color').populate('discountCode');
@@ -40,7 +40,7 @@ const getAProduct = asyncHandler(async (req, res) => {
         }
         res.json(findProduct);
     } catch (err) {
-        throw new Error(err);
+        return next(err);
     }
 });
 

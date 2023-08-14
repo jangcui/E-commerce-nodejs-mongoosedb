@@ -47,7 +47,6 @@ const verifyToken = async (token) => {
             if (err) {
                 reject(err);
             } else {
-                console.log(payload);
                 resolve(payload);
             }
         });

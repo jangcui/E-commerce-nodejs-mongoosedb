@@ -21,7 +21,7 @@ const router = express.Router();
 
 router.post('/login', login);
 
-router.get('/', authMiddleware, isAdmin, getAllUser);
+router.get('/users', authMiddleware, isAdmin, getAllUser);
 router.get('/order/:id', authMiddleware, isAdmin, getAOrder);
 router.get('/orders', authMiddleware, isAdmin, getAllOrders);
 router.get('/month-wise-order-income', authMiddleware, isAdmin, getMonthWiseOrderInCome);

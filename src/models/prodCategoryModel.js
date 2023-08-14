@@ -12,7 +12,7 @@ var prodCategorySchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-    },
+    }, 
 );
 
 //Export the model

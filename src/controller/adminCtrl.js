@@ -71,7 +71,7 @@ const getAUser = asyncHandler(async (req, res) => {
 });
 
 // add to trash bin
-const toggleUserToTrashBin = asyncHandler(async (req, res) => {
+const toggleUserToTrashBin = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     validateMongooseDbId(id);
 
@@ -87,7 +87,7 @@ const toggleUserToTrashBin = asyncHandler(async (req, res) => {
         );
         res.json(userUpdate);
     } catch (err) {
-        throw new Error(err);
+        next(err);
     }
 });
 
@@ -261,93 +261,60 @@ const getAOrder = asyncHandler(async (req, res) => {
     }
 });
 
-// get Month wise order count
 const getMonthWiseOrderInCome = asyncHandler(async (req, res) => {
-    let monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-    ];
-    let d = new Date();
-    let endDate = '';
-    d.setDate(1);
+    const currentDate = new Date();
+    const twelveMonthsAgo = new Date();
 
-    for (let i = 0; i < 11; i++) {
-        d.setMonth(d.getMonth() - 1);
-        endDate = monthNames[d.getMonth()] + ' ' + d.getFullYear();
-    }
+    // Thiết lập ngày, tháng và năm cho cách đây 12 tháng
+    twelveMonthsAgo.setFullYear(currentDate.getFullYear(), currentDate.getMonth() - 11, currentDate.getDate());
+
     const data = await Order.aggregate([
         {
             $match: {
-                createdAt: {
-                    $lte: new Date(),
-                    $gte: new Date(endDate),
+                paid_at: {
+                    $lte: currentDate, // Lấy đơn hàng trước hoặc trong tháng hiện tại
+                    $gte: twelveMonthsAgo, // Lấy đơn hàng trong vòng 12 tháng gần nhất
                 },
             },
         },
         {
             $group: {
                 _id: {
-                    month: '$month',
+                    month: { $month: '$paid_at' }, // Nhóm theo tháng
                 },
                 amount: { $sum: '$total_price_after_discount' },
                 count: { $sum: 1 },
             },
         },
     ]);
+
     res.json(data);
 });
 
 // get Year total order
 const getYearlyTotalOrders = asyncHandler(async (req, res) => {
-    let monthNames = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-    ];
-    let d = new Date();
-    let endDate = '';
-    d.setDate(1);
+    const currentDate = new Date();
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(currentDate.getMonth() - 11); // Chỉnh số 11 để lấy 12 tháng trước
 
-    for (let i = 0; i < 11; i++) {
-        d.setMonth(d.getMonth() - 1);
-        endDate = monthNames[d.getMonth()] + ' ' + d.getFullYear();
-    }
     const data = await Order.aggregate([
         {
             $match: {
-                createdAt: {
-                    $lte: new Date(),
-                    $gte: new Date(endDate),
+                paid_at: {
+                    $lte: currentDate, // Lấy đơn hàng trước hoặc trong tháng hiện tại
+                    $gte: twelveMonthsAgo, // Lấy đơn hàng trong vòng 12 tháng gần nhất
                 },
             },
         },
         {
             $group: {
-                _id: null,
-                count: { $sum: 1 },
-                amount: { $sum: '$total_price_after_discount' },
+                _id: null, // Không nhóm theo bất kỳ trường nào (tổng hợp toàn bộ đơn hàng)
+                count: { $sum: 1 }, // Tổng số đơn hàng
+                amount: { $sum: '$total_price_after_discount' }, // Tổng số tiền
             },
         },
     ]);
+
     res.json(data);
 });
 

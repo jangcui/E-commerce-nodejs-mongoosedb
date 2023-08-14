@@ -34,45 +34,6 @@ const createUser = asyncHandler(async (req, res) => {
     }
 });
 
-const logins = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-    //if user exists or not
-    const findUser = await User.findOne({ email });
-    if (!findUser) {
-        throw new Error('Invalid Credentials');
-    }
-
-    if (findUser && (await findUser.isPasswordMatched(password))) {
-        const accessToken = await generateToken(findUser?._id);
-        const refreshToken = await generateRefreshToken(findUser?._id);
-        const updateUser = await User.findByIdAndUpdate(
-            findUser?._id,
-            {
-                token: accessToken,
-            },
-            {
-                new: true,
-            },
-        );
-
-        res.cookie('adminToken', refreshToken, {
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000,
-        });
-        res.json({
-            _id: findUser?._id,
-            fist_name: findUser?.fist_name,
-            last_name: findUser?.last_name,
-            email: findUser?.email,
-            // role: findUser?.role,
-            mobile: findUser?.mobile,
-            token: accessToken,
-        });
-    } else {
-        throw new Error('Invalid Credentials');
-    }
-});
-
 ///login user
 const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;

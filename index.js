@@ -30,7 +30,13 @@ dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://xpj-commerce.vercel.app'],
+    origin: [
+        'http://localhost:4000',
+        'http://localhost:3000',
+        'https://xpj-commerce.vercel.app',
+        'https://console.cloudinary.com/',
+        'https://checkout.razorpay.com',
+    ],
     // origin: '*',
     credentials: true, //access-control-allow-credentials:true
     optionSuccessStatus: 200,
