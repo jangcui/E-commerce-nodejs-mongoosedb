@@ -60,7 +60,7 @@ const login = asyncHandler(async (req, res) => {
         });
         res.json({
             _id: findUser?._id,
-            fist_name: findUser?.fist_name,
+            first_name: findUser?.first_name,
             last_name: findUser?.last_name,
             // role: findUser?.role,
             email: findUser?.email,
@@ -79,7 +79,7 @@ const updateAUser = asyncHandler(async (req, res) => {
         const newUpdate = await User.findByIdAndUpdate(
             _id,
             {
-                fist_name: req?.body?.fist_name,
+                first_name: req?.body?.first_name,
                 last_name: req?.body?.last_name,
                 email: req?.body?.email,
                 mobile: req?.body?.mobile,

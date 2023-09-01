@@ -30,9 +30,24 @@ const getUsersTrash = asyncHandler(async (req, res) => {
         throw new Error(err);
     }
 });
+// clear trash bin
+const clearUserTrashBin = asyncHandler(async (req, res, next) => {
+    try {
+        const findUser = await User.find({ isDelete: true });
+        await Promise.all(
+            findUser.map(async () => {
+                await User.findOneAndDelete({ isDelete: true });
+            }),
+        );
+        res.json('Deleted.');
+    } catch (err) {
+        next(err);
+    }
+});
 
 module.exports = {
     getProductsTrash,
     getBlogsTrash,
     getUsersTrash,
+    clearUserTrashBin,
 };

@@ -6,27 +6,27 @@ const slugify = require('slugify');
 const validateMongooseDbId = require('../untils/validateMongooseDbId');
 
 // create a new product
-const createProduct = asyncHandler(async (req, res) => {
+const createProduct = asyncHandler(async (req, res, next) => {
     try {
         if (req.body.title) {
             req.body.slug = slugify(req.body.title);
         }
         const newProduct = await Product.create(req.body);
         res.json(newProduct);
-    } catch (err) {
-        throw new Error(err);
+    } catch (error) {
+        next(error);
     }
 });
 
 /// update a product
-const updateProduct = asyncHandler(async (req, res) => {
+const updateProduct = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
         const updateProduct = await Product.findByIdAndUpdate(id, req.body, { new: true });
         res.json(updateProduct);
-    } catch (err) {
-        throw new Error(err);
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -39,13 +39,13 @@ const getAProduct = asyncHandler(async (req, res, next) => {
             throw new Error('Present product not found');
         }
         res.json(findProduct);
-    } catch (err) {
-        return next(err);
+    } catch (error) {
+        next(error);
     }
 });
 
 //get all products
-const getAllProducts = asyncHandler(async (req, res) => {
+const getAllProducts = asyncHandler(async (req, res, next) => {
     try {
         ///filtering
         const queryObj = { ...req.query };
@@ -90,12 +90,12 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
         const product = await query.populate('discountCode');
         res.json(product);
-    } catch (err) {
-        throw new Error(err);
+    } catch (error) {
+        next(error);
     }
 });
-//// add to trash bin
-const toggleProductToTrashBin = asyncHandler(async (req, res) => {
+// add to trash bin
+const toggleProductToTrashBin = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
@@ -109,8 +109,8 @@ const toggleProductToTrashBin = asyncHandler(async (req, res) => {
             { new: true },
         );
         res.json(productUpdate);
-    } catch (err) {
-        throw new Error(err);
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -211,7 +211,7 @@ const rating = asyncHandler(async (req, res) => {
 });
 
 ///apply discount code for product
-const applyDiscount = asyncHandler(async (req, res) => {
+const applyDiscount = asyncHandler(async (req, res, next) => {
     const { nameProduct, discountCode } = req.body;
     // validateMongooseDbId(nameProduct);
 
@@ -238,32 +238,35 @@ const applyDiscount = asyncHandler(async (req, res) => {
         product.price_after_discount = product.price - (product.price * discount.percentage) / 100;
         product.discountCode = discount;
         const updatedProduct = await product.save();
-        res.json(updatedProduct);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.json({
+            message: 'Applied successfully.',
+        });
+    } catch (error) {
+        next(error);
     }
 });
 
 ///remove discount code for product
-const removeDiscount = asyncHandler(async (req, res) => {
-    const { productId } = req.params;
+const removeDiscount = asyncHandler(async (req, res, next) => {
+    const { slug } = req.params;
     try {
-        const product = await Product.findById(productId);
+        const slugConvert = slug.toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-');
+        const product = await Product.findOne({
+            slug: slugConvert,
+        });
         if (!product) {
-            res.status(404).json({ error: 'Product does not exist' });
+            res.status(404).json({ error: 'Product does not exist or not found' });
             return;
         }
         product.discountCode = undefined;
         product.price_after_discount = undefined;
         const updatedProduct = await product.save();
         res.json(updatedProduct);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+    } catch (error) {
+        next(error);
     }
 });
-const clearObject = asyncHandler(async (req, res) => {
+const clearObject = asyncHandler(async (req, res, next) => {
     try {
         const products = await Product.find();
 
@@ -274,8 +277,8 @@ const clearObject = asyncHandler(async (req, res) => {
         }
 
         res.json(products);
-    } catch (err) {
-        throw new Error(err);
+    } catch (error) {
+        next(error);
     }
 });
 module.exports = {

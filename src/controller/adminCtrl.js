@@ -36,7 +36,7 @@ const login = asyncHandler(async (req, res) => {
         });
         res.json({
             _id: findAdmin?._id,
-            fist_name: findAdmin?.fist_name,
+            first_name: findAdmin?.first_name,
             last_name: findAdmin?.last_name,
             email: findAdmin?.email,
             // role: findAdmin?.role,
@@ -92,14 +92,18 @@ const toggleUserToTrashBin = asyncHandler(async (req, res, next) => {
 });
 
 //delete a user
-const deleteAUser = asyncHandler(async (req, res) => {
+const deleteAUser = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     validateMongooseDbId(id);
     try {
-        const deleteAUser = await User.findByIdAndDelete(id);
+        const isUser = await User.findOne({ _id: id });
+        if (!isUser) {
+            throw new Error('This user was not found or has been deleted');
+        }
+        const deleteAUser = await User.findByIdAndDelete({ _id: id });
         res.json({ message: 'Deleted.' });
-    } catch (error) {
-        throw new Error(error);
+    } catch (err) {
+        next(err);
     }
 });
 
@@ -132,7 +136,41 @@ const refreshToken = asyncHandler(async (req, res, next) => {
                 new: true,
             },
         );
+
         res.json({ token: newToken });
+    } catch (err) {
+        next(err);
+    }
+});
+
+/// check isLogin
+const checkIsLoginAdmin = asyncHandler(async (req, res, next) => {
+    try {
+        const cookie = req.cookies;
+        const adminToken = cookie?.adminToken;
+
+        if (!adminToken) {
+            throw new Error('No refresh token in cookie');
+        }
+
+        const { id } = await verifyRefreshToken(adminToken);
+
+        const user = await User.findOne({ _id: id });
+        if (!user) {
+            throw new Error('user not found.');
+        }
+
+        res.json({
+            isLogin: true,
+            token: user.token,
+            admin: {
+                _id: user._id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                email: user.email,
+                mobile: user.mobile,
+            },
+        });
     } catch (err) {
         next(err);
     }
@@ -334,4 +372,5 @@ module.exports = {
     deleteOrder,
     getAOrder,
     updateOrderStatus,
+    checkIsLoginAdmin,
 };

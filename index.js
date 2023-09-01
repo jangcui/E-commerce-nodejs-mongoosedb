@@ -36,6 +36,7 @@ const corsOptions = {
         'https://xpj-commerce.vercel.app',
         'https://console.cloudinary.com/',
         'https://checkout.razorpay.com',
+        'https://xpj-commerce.vercel.app/',
     ],
     // origin: '*',
     credentials: true, //access-control-allow-credentials:true

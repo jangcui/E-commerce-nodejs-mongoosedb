@@ -15,6 +15,7 @@ const {
     deleteOrder,
     getAOrder,
     updateOrderStatus,
+    checkIsLoginAdmin,
 } = require('../controller/adminCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const router = express.Router();
@@ -27,6 +28,7 @@ router.get('/orders', authMiddleware, isAdmin, getAllOrders);
 router.get('/month-wise-order-income', authMiddleware, isAdmin, getMonthWiseOrderInCome);
 router.get('/year-total-orders', authMiddleware, isAdmin, getYearlyTotalOrders);
 router.get('/refresh', refreshToken);
+router.get('/login', checkIsLoginAdmin);
 router.get('/:id', authMiddleware, isAdmin, getAUser);
 
 router.delete('/order/:id', authMiddleware, isAdmin, deleteOrder);
