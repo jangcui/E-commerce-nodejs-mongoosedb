@@ -34,7 +34,7 @@ const login = asyncHandler(async (req, res) => {
             httpOnly: true,
             maxAge: 365 * 24 * 60 * 60,
             secure: true,
-            domain: 'https://jangcui-backend-project.onrender.com/',
+            domain: 'https://jangcui-backend-project.onrender.com',
         });
         res.json({
             _id: findAdmin?._id,
