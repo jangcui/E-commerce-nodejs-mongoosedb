@@ -10,7 +10,6 @@ dotenv.config();
 const cron = require('node-cron');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-// const connectRedis = require('./src/config/redisConnection');
 const authRouter = require('./src/routes/authRoute');
 const adminRouter = require('./src/routes/adminRoute');
 const productRouter = require('./src/routes/productRoute');

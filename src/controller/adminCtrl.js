@@ -29,10 +29,10 @@ const login = asyncHandler(async (req, res) => {
                 new: true,
             },
         );
-
         res.cookie('adminToken', refreshToken, {
             httpOnly: true,
-            maxAge: 365 * 24 * 60 * 60,
+            maxAge: 30 * 24 * 60 * 60,
+            secure: true,
         });
         res.json({
             _id: findAdmin?._id,
@@ -148,18 +148,15 @@ const checkIsLoginAdmin = asyncHandler(async (req, res, next) => {
     try {
         const cookie = req.cookies;
         const adminToken = cookie?.adminToken;
-
         if (!adminToken) {
             throw new Error('No refresh token in cookie');
         }
-
         const { id } = await verifyRefreshToken(adminToken);
 
         const user = await User.findOne({ _id: id });
         if (!user) {
             throw new Error('user not found.');
         }
-
         res.json({
             isLogin: true,
             token: user.token,
