@@ -40,6 +40,8 @@ const corsOptions = {
         'https://checkout.razorpay.com',
         'https://xpj-commerce.vercel.app/',
         'https://jangcui-backend-project.onrender.com',
+        'https://admin-side-mern-pj.vercel.app/',
+        '*',
     ],
     // origin: '*',
     credentials: true, //access-control-allow-credentials:true
