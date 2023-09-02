@@ -37,6 +37,7 @@ const corsOptions = {
         'https://console.cloudinary.com/',
         'https://checkout.razorpay.com',
         'https://xpj-commerce.vercel.app/',
+        'https://jangcui-backend-project.onrender.com/api/',
     ],
     // origin: '*',
     credentials: true, //access-control-allow-credentials:true
