@@ -29,6 +29,8 @@ const { autoDeleteUser, autoDeleteProduct, autoDeleteBlog } = require('./src/mid
 dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
 const corsOptions = {
     origin: [
         'http://localhost:4000',
@@ -45,7 +47,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-app.use(cookieParser());
 app.use(morgan('dev'));
 
 app.use('/api/user', authRouter);
