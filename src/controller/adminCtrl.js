@@ -33,7 +33,6 @@ const login = asyncHandler(async (req, res) => {
         res.cookie('adminToken', refreshToken, {
             httpOnly: true,
             maxAge: 365 * 24 * 60 * 60,
-            secure: true,
         });
         res.json({
             _id: findAdmin?._id,
