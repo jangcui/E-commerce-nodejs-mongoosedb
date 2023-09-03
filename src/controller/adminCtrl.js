@@ -144,33 +144,29 @@ const refreshToken = asyncHandler(async (req, res, next) => {
 });
 
 /// check isLogin
-const checkIsLoginAdmin = asyncHandler(async (req, res, next) => {
-    try {
-        const cookie = req.cookies;
-        const adminToken = cookie?.adminToken;
-        if (!adminToken) {
-            throw new Error('No refresh token in cookie');
-        }
-        const { id } = await verifyRefreshToken(adminToken);
-
-        const user = await User.findOne({ _id: id });
-        if (!user) {
-            throw new Error('user not found.');
-        }
-        res.json({
-            isLogin: true,
-            token: user.token,
-            admin: {
-                _id: user._id,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                mobile: user.mobile,
-            },
-        });
-    } catch (err) {
-        next(err);
+const checkIsLoginAdmin = asyncHandler(async (req, res) => {
+    const cookie = req.cookies;
+    const adminToken = cookie?.adminToken;
+    if (!adminToken) {
+        throw new Error('No refresh token in cookie');
     }
+    const { id } = await verifyRefreshToken(adminToken);
+
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+        throw new Error('user not found.');
+    }
+    res.json({
+        isLogin: true,
+        token: user.token,
+        admin: {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            mobile: user.mobile,
+        },
+    });
 });
 
 // handle logout

@@ -28,26 +28,25 @@ const { autoDeleteUser, autoDeleteProduct, autoDeleteBlog } = require('./src/mid
 dbConnect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(morgan('dev'));
 
-const corsOptions = {
+const option = {
     origin: [
         'http://localhost:4000',
         'http://localhost:3000',
         'https://xpj-commerce.vercel.app',
         'https://console.cloudinary.com/',
         'https://checkout.razorpay.com',
-        'https://xpj-commerce.vercel.app/',
-        'https://jangcui-backend-project.onrender.com',
+        // 'https://jangcui-backend-project.onrender.com',
         'https://admin-side-mern-pj.vercel.app',
         '*',
     ],
     // origin: '*',
-    credentials: true, //access-control-allow-credentials:true
-    optionSuccessStatus: 200,
+    credentials: true,
 };
-app.use(cors(corsOptions));
+
+app.use(cors(option));
+app.use(cookieParser());
 
 app.use('/api/user', authRouter);
 app.use('/api/admin', adminRouter);
