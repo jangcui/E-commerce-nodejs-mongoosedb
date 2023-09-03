@@ -33,6 +33,7 @@ const login = asyncHandler(async (req, res) => {
             httpOnly: true,
             maxAge: 30 * 24 * 60 * 60,
             secure: true,
+            sameSite: 'none',
         });
         res.json({
             _id: findAdmin?._id,
@@ -147,6 +148,7 @@ const refreshToken = asyncHandler(async (req, res, next) => {
 const checkIsLoginAdmin = asyncHandler(async (req, res) => {
     const cookie = req.cookies;
     const adminToken = cookie?.adminToken;
+
     if (!adminToken) {
         throw new Error('No refresh token in cookie');
     }
