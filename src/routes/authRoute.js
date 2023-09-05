@@ -17,6 +17,7 @@ const {
     removeProductFromCart,
     updateProductQuantityFromCart,
     emptyCart,
+    checkIsLogin,
 } = require('../controller/userCtrl');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const { checkout, paymentVerifyCation } = require('../controller/paymentCtrl');
@@ -31,6 +32,7 @@ router.post('/order/checkout', authMiddleware, checkout);
 router.post('/order/payment-verify', authMiddleware, paymentVerifyCation);
 
 router.get('/refresh', refreshToken);
+router.get('/login', checkIsLogin);
 router.get('/wishlist', authMiddleware, getWishlist);
 router.get('/cart', authMiddleware, getUserCart);
 router.get('/order', authMiddleware, getMyOrder);

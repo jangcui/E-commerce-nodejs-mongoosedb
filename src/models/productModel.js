@@ -74,7 +74,9 @@ var productSchema = new mongoose.Schema(
         },
         deleteDate: Date,
     },
-
+    {
+        strictPopulate: false,
+    },
     {
         timestamps: true,
     },

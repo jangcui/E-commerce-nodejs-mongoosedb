@@ -1,13 +1,7 @@
 const crypto = require('crypto');
 const asyncHandler = require('express-async-handler');
 
-const {
-    generateToken,
-    generateRefreshToken,
-    verifyRefreshToken,
-    addToBlacklist,
-    verifyToken,
-} = require('../config/jwtToken');
+const { generateToken, generateRefreshToken, verifyRefreshToken, addToBlacklist } = require('../config/jwtToken');
 const validateMongooseDbId = require('../untils/validateMongooseDbId');
 const User = require('../models/userModel');
 const Cart = require('../models/cartModel');
@@ -58,6 +52,7 @@ const login = asyncHandler(async (req, res) => {
             httpOnly: true,
             maxAge: 30 * 24 * 60 * 60,
             secure: true,
+            sameSite: 'none',
         });
         res.json({
             _id: findUser?._id,
@@ -72,6 +67,33 @@ const login = asyncHandler(async (req, res) => {
         throw new Error('Invalid Credentials');
     }
 });
+
+const checkIsLogin = asyncHandler(async (req, res) => {
+    const cookie = req.cookies;
+    const token = cookie?.refreshToken;
+
+    if (!token) {
+        throw new Error('No refresh token in cookie');
+    }
+    const { id } = await verifyRefreshToken(token);
+
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+        throw new Error('user not found.');
+    }
+    res.json({
+        isLogin: true,
+        user: {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            mobile: user.mobile,
+            token: user.token,
+        },
+    });
+});
+
 //update a user
 const updateAUser = asyncHandler(async (req, res) => {
     const { _id } = req.user;
@@ -250,7 +272,7 @@ const getWishlist = asyncHandler(async (req, res) => {
     validateMongooseDbId(_id);
     try {
         const findUser = await User.findById(_id).populate('wishlist');
-        res.json(findUser);
+        res.json(findUser.wishlist);
     } catch (err) {
         throw new Error(err);
     }
@@ -394,4 +416,5 @@ module.exports = {
     removeProductFromCart,
     updateProductQuantityFromCart,
     emptyCart,
+    checkIsLogin,
 };

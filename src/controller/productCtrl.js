@@ -34,7 +34,10 @@ const updateProduct = asyncHandler(async (req, res, next) => {
 const getAProduct = asyncHandler(async (req, res, next) => {
     const { slug } = req.params;
     try {
-        const findProduct = await Product.findOne({ slug: slug.trim() }).populate('color').populate('discountCode');
+        const findProduct = await Product.findOne({ slug: slug.trim() })
+            .populate('color')
+            .populate('discountCode')
+            .populate('ratings.postedBy');
         if (!findProduct) {
             throw new Error('Present product not found');
         }
@@ -127,11 +130,10 @@ const deleteAProduct = asyncHandler(async (req, res) => {
 });
 
 ///add to wishlist
-const addToWishList = asyncHandler(async (req, res) => {
+const addToWishList = asyncHandler(async (req, res, next) => {
     const { _id } = req.user;
     const { prodId } = req.body;
     validateMongooseDbId(_id);
-
     try {
         const user = await User.findById(_id);
         const alreadyAdded = user?.wishlist?.find((id) => id.toString() === prodId);
@@ -144,7 +146,7 @@ const addToWishList = asyncHandler(async (req, res) => {
                 { new: true },
             );
             res.json({
-                message: 'Product Removed To Wishlist',
+                message: 'Removed From Wishlist',
                 user,
             });
         } else {
@@ -156,12 +158,12 @@ const addToWishList = asyncHandler(async (req, res) => {
                 { new: true },
             );
             res.json({
-                message: 'Product Added From Wishlist',
+                message: 'Added To Wishlist',
                 user,
             });
         }
     } catch (err) {
-        throw new Error(err);
+        next(err);
     }
 });
 
@@ -181,7 +183,7 @@ const rating = asyncHandler(async (req, res) => {
                     $set: { 'ratings.$.star': star, 'ratings.$.comment': comment },
                 },
                 { new: true },
-            ).populate('ratings.postedBy'); // Populate trường "postedBy" trong mảng "ratings.postedBy"
+            ).populate('ratings.postedBy');
         } else {
             const rateProduct = await Product.findByIdAndUpdate(
                 prodId,
@@ -191,7 +193,7 @@ const rating = asyncHandler(async (req, res) => {
                     },
                 },
                 { new: true },
-            ).populate('ratings.postedBy'); // Populate trường "postedBy" trong mảng "ratings.postedBy"
+            ).populate('ratings.postedBy');
         }
         const getAllRatings = await Product.findById(prodId);
         let totalRating = getAllRatings?.ratings?.length;
