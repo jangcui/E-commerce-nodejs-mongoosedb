@@ -1,6 +1,6 @@
 const Coupon = require('../models/couponModel');
 const asyncHandler = require('express-async-handler');
-const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const validateMongooseDbId = require('../utils/validateMongooseDbId');
 
 ///cerate coupon
 const createCoupon = asyncHandler(async (req, res) => {

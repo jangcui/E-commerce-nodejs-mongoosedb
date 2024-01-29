@@ -1,6 +1,6 @@
 const Brand = require('../models/brandModel');
 const asyncHandler = require('express-async-handler');
-const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const validateMongooseDbId = require('../utils/validateMongooseDbId');
 
 ///cerate brand
 const createBrand = asyncHandler(async (req, res) => {

@@ -50,7 +50,8 @@ var productSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
-        images: [],
+        images: {type: Array, default: []},
+        thumb : String,
         color: [
             {
                 type: mongoose.Schema.Types.ObjectId,
@@ -82,5 +83,12 @@ var productSchema = new mongoose.Schema(
     },
 );
 
+productSchema.pre('save', function(next) {
+    if (this.images && this.images.length > 0) {
+      this.thumb = this.images[0];
+    }
+  
+    next();
+  });
 //Export the model
 module.exports = mongoose.model('Product', productSchema);

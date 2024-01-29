@@ -11,12 +11,13 @@ const {
     toggleProductToTrashBin,
     applyDiscount,
     removeDiscount,
-    clearObject,
+    clearObject,updateThumbProduct
 } = require('../controller/productCtrl');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 
 router.post('/', authMiddleware, isAdmin, createProduct);
 router.post('/discount/:slug', authMiddleware, isAdmin, removeDiscount);
+router.post('/update-thumb', authMiddleware, isAdmin, updateThumbProduct);
 
 router.get('/', getAllProducts);
 router.get('/:slug', getAProduct);

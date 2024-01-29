@@ -1,7 +1,7 @@
 const Blog = require('../models/blogModel');
-const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const validateMongooseDbId = require('../utils/validateMongooseDbId');
 const asyncHandler = require('express-async-handler');
-const cloudinaryUploadImg = require('../untils/cloudinary');
+const cloudinaryUploadImg = require('../utils/cloudinary');
 const fs = require('fs');
 
 ///create blog

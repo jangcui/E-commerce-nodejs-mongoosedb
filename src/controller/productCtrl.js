@@ -3,7 +3,7 @@ const Discount = require('../models/discountModel');
 const User = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
-const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const validateMongooseDbId = require('../utils/validateMongooseDbId');
 
 // create a new product
 const createProduct = asyncHandler(async (req, res, next) => {
@@ -46,6 +46,30 @@ const getAProduct = asyncHandler(async (req, res, next) => {
         next(error);
     }
 });
+
+//update thumb product
+const updateThumbProduct = asyncHandler(async (req, res, next) => {
+    try {
+      const products = await Product.find({});
+  
+      for (const product of products) {
+        if (product.images && product.images.length > 0) {
+          product.thumb = product.images[0].url;
+        } else {
+          product.thumb = 'default_thumb_url';
+        }
+  
+        await Product.updateOne({ _id: product._id }, { $set: { thumb: product.thumb }});
+        console.log(`Updated product ${product._id}`);
+      }
+  
+      res.status(200).json({ success: true, message: 'Update successful' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  });
+  
 
 //get all products
 const getAllProducts = asyncHandler(async (req, res, next) => {
@@ -294,5 +318,5 @@ module.exports = {
     rating,
     applyDiscount,
     removeDiscount,
-    clearObject,
+    clearObject,updateThumbProduct
 };

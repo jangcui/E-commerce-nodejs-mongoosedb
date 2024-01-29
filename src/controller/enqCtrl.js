@@ -1,6 +1,6 @@
 const Enquiry = require('../models/enqModel');
 const asyncHandler = require('express-async-handler');
-const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const validateMongooseDbId = require('../utils/validateMongooseDbId');
 const slugify = require('slugify');
 
 ///cerate enquiry

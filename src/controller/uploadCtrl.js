@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const { cloudinaryUploadImg, cloudinaryDeleteImg } = require('../untils/cloudinary');
+const { cloudinaryUploadImg, cloudinaryDeleteImg } = require('../utils/cloudinary');
 const fs = require('fs');
 const { reSizeImage } = require('../middlewares/uploadImages');
 

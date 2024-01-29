@@ -1,6 +1,6 @@
 const Discount = require('../models/discountModel');
 const asyncHandler = require('express-async-handler');
-const validateMongooseDbId = require('../untils/validateMongooseDbId');
+const validateMongooseDbId = require('../utils/validateMongooseDbId');
 
 ///cerate Discount
 const createDiscount = asyncHandler(async (req, res) => {
