@@ -1,3 +1,5 @@
+'use strict'
+
 const jwt = require('jsonwebtoken')
 const keySecret = process.env.JWT_SECRET
 const client = require('./redisConnection')

@@ -1,15 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const { createBrand, updateBrand, getTheBrand, getAllBrands, deleteTheBrand } = require('../controller/brandCtrl');
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
+'use strict'
 
-router.post('/', authMiddleware, isAdmin, createBrand);
+const express = require('express')
+const router = express.Router()
+const { createBrand, updateBrand, getTheBrand, getAllBrands, deleteTheBrand } = require('../controller/brandCtrl')
+const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware')
 
-router.put('/:id', authMiddleware, isAdmin, updateBrand);
+router.post('/', authMiddleware, isAdmin, createBrand)
 
-router.get('/', getAllBrands);
-router.get('/:id', authMiddleware, isAdmin, getTheBrand);
+router.put('/:id', authMiddleware, isAdmin, updateBrand)
 
-router.delete('/:id', authMiddleware, isAdmin, deleteTheBrand);
+router.get('/', getAllBrands)
+router.get('/:id', authMiddleware, isAdmin, getTheBrand)
 
-module.exports = router;
+router.delete('/:id', authMiddleware, isAdmin, deleteTheBrand)
+
+module.exports = router

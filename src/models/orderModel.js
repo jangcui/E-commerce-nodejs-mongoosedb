@@ -1,3 +1,5 @@
+'use strict'
+
 const mongoose = require('mongoose') // Erase if already required
 
 // Declare the Schema of the Mongo model
@@ -22,7 +24,7 @@ var oderSchema = new mongoose.Schema(
             required: true,
          },
          city: {
-            type: String, 
+            type: String,
             required: true,
          },
          country: {

@@ -1,3 +1,5 @@
+'use strict'
+
 const asyncHandler = require('express-async-handler')
 const { generateToken, generateRefreshToken, verifyRefreshToken, addToBlacklist } = require('../config/jwtToken')
 const validateMongooseDbId = require('../utils/validateMongooseDbId')

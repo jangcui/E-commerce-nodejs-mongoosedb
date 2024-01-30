@@ -1,3 +1,5 @@
+'use strict'
+
 const express = require('express')
 const { addToCart, getAllCart, deleteProductInCart, updateQuantityCart } = require('../controller/cartCtrl')
 const { authMiddleware } = require('../middlewares/authMiddleware')

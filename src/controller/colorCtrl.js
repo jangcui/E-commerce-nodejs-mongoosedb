@@ -1,3 +1,5 @@
+'use strict'
+
 const Color = require('../models/colorModel')
 const asyncHandler = require('express-async-handler')
 const validateMongooseDbId = require('../utils/validateMongooseDbId')

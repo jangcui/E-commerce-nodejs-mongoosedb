@@ -1,13 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { uploadImages, deleteImage, deleteManyImage } = require('../controller/uploadCtrl');
+'use strict'
 
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
-const { uploadPhoto } = require('../middlewares/uploadImages');
+const express = require('express')
+const router = express.Router()
+const { uploadImages, deleteImage, deleteManyImage } = require('../controller/uploadCtrl')
 
-router.post('/', authMiddleware, isAdmin, uploadPhoto.array('images', 10), uploadImages);
+const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware')
+const { uploadPhoto } = require('../middlewares/uploadImages')
 
-router.delete('/', authMiddleware, isAdmin, deleteManyImage);
-router.delete('/:id', authMiddleware, isAdmin, deleteImage);
+router.post('/', authMiddleware, isAdmin, uploadPhoto.array('images', 10), uploadImages)
 
-module.exports = router;
+router.delete('/', authMiddleware, isAdmin, deleteManyImage)
+router.delete('/:id', authMiddleware, isAdmin, deleteImage)
+
+module.exports = router

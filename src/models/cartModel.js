@@ -1,3 +1,5 @@
+'use strict'
+
 const mongoose = require('mongoose') // Erase if already required
 
 // Declare the Schema of the Mongo model
@@ -13,7 +15,7 @@ var cartSchema = new mongoose.Schema(
          required: true,
          enum: ['active', 'completed', 'pending', 'failed'],
          default: 'active',
-      }, 
+      },
       cart_products: [
          {
             _id: false,

@@ -1,3 +1,5 @@
+'use strict'
+
 const bodyParser = require('body-parser')
 const express = require('express')
 const PORT = process.env.PORT || 4000

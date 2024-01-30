@@ -1,15 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const { createColor, updateColor, getTheColor, getAllColors, deleteTheColor } = require('../controller/colorCtrl');
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
+'use strict'
 
-router.post('/', authMiddleware, isAdmin, createColor);
+const express = require('express')
+const router = express.Router()
+const { createColor, updateColor, getTheColor, getAllColors, deleteTheColor } = require('../controller/colorCtrl')
+const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware')
 
-router.put('/:id', authMiddleware, isAdmin, updateColor);
+router.post('/', authMiddleware, isAdmin, createColor)
 
-router.get('/', authMiddleware, isAdmin, getAllColors);
-router.get('/:id', authMiddleware, isAdmin, getTheColor);
+router.put('/:id', authMiddleware, isAdmin, updateColor)
 
-router.delete('/:id', authMiddleware, isAdmin, deleteTheColor);
+router.get('/', authMiddleware, isAdmin, getAllColors)
+router.get('/:id', authMiddleware, isAdmin, getTheColor)
 
-module.exports = router;
+router.delete('/:id', authMiddleware, isAdmin, deleteTheColor)
+
+module.exports = router

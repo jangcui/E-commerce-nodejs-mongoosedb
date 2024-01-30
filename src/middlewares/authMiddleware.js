@@ -1,3 +1,5 @@
+'use strict'
+
 const User = require('../models/userModel')
 const asyncHandler = require('express-async-handler')
 const { verifyToken, verifyRefreshToken } = require('../config/jwtToken')

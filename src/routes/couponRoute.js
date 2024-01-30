@@ -1,21 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const {
-    createCoupon,
-    updateCoupon,
-    getTheCoupon,
-    getAllCoupons,
-    deleteTheCoupon,
-} = require('../controller/couponCtrl');
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
+'use strict'
 
-router.post('/', authMiddleware, isAdmin, createCoupon);
+const express = require('express')
+const router = express.Router()
+const { createCoupon, updateCoupon, getTheCoupon, getAllCoupons, deleteTheCoupon } = require('../controller/couponCtrl')
+const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware')
 
-router.put('/:id', authMiddleware, isAdmin, updateCoupon);
+router.post('/', authMiddleware, isAdmin, createCoupon)
 
-router.get('/', authMiddleware, isAdmin, getAllCoupons);
-router.get('/:id', authMiddleware, isAdmin, getTheCoupon);
+router.put('/:id', authMiddleware, isAdmin, updateCoupon)
 
-router.delete('/:id', authMiddleware, isAdmin, deleteTheCoupon);
+router.get('/', authMiddleware, isAdmin, getAllCoupons)
+router.get('/:id', authMiddleware, isAdmin, getTheCoupon)
 
-module.exports = router;
+router.delete('/:id', authMiddleware, isAdmin, deleteTheCoupon)
+
+module.exports = router

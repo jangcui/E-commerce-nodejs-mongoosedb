@@ -15,6 +15,8 @@ const createCartIdCookie = async (req, res) => {
    const serializedCookie = cookie.serialize('cart_id_guest', randomId, {
       httpOnly: true,
       maxAge: EXPIRE,
+      secure: true,
+      sameSite: 'none',
       path: '/api',
    })
 
@@ -39,6 +41,8 @@ const deleteCartIdCookie = async (res) => {
       httpOnly: true,
       maxAge: 0,
       path: '/api',
+      secure: true,
+      sameSite: 'none',
    })
 
    await res.setHeader('Set-Cookie', emptyCookie)

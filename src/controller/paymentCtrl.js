@@ -1,3 +1,5 @@
+'use strict'
+
 const Razorpay = require('razorpay')
 const { ForbiddenError } = require('../core/errorResponse')
 

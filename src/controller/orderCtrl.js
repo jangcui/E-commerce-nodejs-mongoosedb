@@ -1,3 +1,5 @@
+'use strict'
+
 // create order
 const mongoose = require('mongoose')
 const asyncHandler = require('express-async-handler')
@@ -5,7 +7,13 @@ const asyncHandler = require('express-async-handler')
 const { NotFoundError, BadRequestError } = require('../core/errorResponse')
 const Order = require('../models/orderModel')
 const Product = require('../models/productModel')
-const { createModel, findModelByIdAndUpdate, findOneModel, findModelById, findModel } = require('../models/repositories/modelRepo')
+const {
+   createModel,
+   findModelByIdAndUpdate,
+   findOneModel,
+   findModelById,
+   findModel,
+} = require('../models/repositories/modelRepo')
 const validateMongooseDbId = require('../utils/validateMongooseDbId')
 const Cart = require('../models/cartModel')
 const { updateCartTotalPrice } = require('../service/cartService')
@@ -36,9 +44,8 @@ const createOrderMongo = async (
    orderProducts,
    paymentInfo,
    total_price,
-   total_price_after_discount, 
+   total_price_after_discount,
 ) => {
-   
    const order = await createModel({
       model: Order,
       data: {
@@ -70,7 +77,7 @@ const processOrderAndUpdateCart = async (userId, orderProducts) => {
          if (existingProductIndex !== -1) {
             userCart.cart_products.splice(existingProductIndex, 1)
             await userCart.save()
-            await updateCartTotalPrice({userId});
+            await updateCartTotalPrice({ userId })
          }
 
          await findModelByIdAndUpdate({
